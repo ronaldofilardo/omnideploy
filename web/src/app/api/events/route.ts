@@ -144,7 +144,11 @@ export async function GET() {
     })
     console.log(`[API Events] Encontrados ${events.length} eventos`)
 
-    return NextResponse.json(events)
+    return NextResponse.json(events, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300', // Cache por 1 min, stale por 5 min
+      },
+    })
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     console.error(`[API Events] Erro ao buscar eventos:`, {

@@ -33,7 +33,6 @@
 		"vitest": "^4.0.3"
 	},
 	"scripts": {
-		"autogit": "git add . && git commit -m \"${npm_config_msg:-Commit automático}\" && git push",
-		"deploy:vercel": "pnpm run autogit && vercel --prod"
+		"autogit": "git add . && git commit -m \"${npm_config_msg:-Commit automático}\" && git push"
 	}
 }

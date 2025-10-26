@@ -11,6 +11,9 @@ export default defineConfig({
     globalSetup: './test/globalSetup.ts',
     setupFiles: ['./src/test/setup.ts', './src/test/setupFetchMock.ts', 'vitest-canvas-mock'],
     exclude: ['node_modules/', 'e2e/'],
+    env: {
+      NODE_ENV: 'test',
+    },
   },
   resolve: {
     alias: {

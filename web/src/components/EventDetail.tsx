@@ -17,7 +17,7 @@ interface Professional {
 interface Event {
   id: string
   title: string
-  description?: string
+  description?: string | null
   date: string
   type: string
   startTime?: string

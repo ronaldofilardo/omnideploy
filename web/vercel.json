@@ -1,0 +1,13 @@
+{
+  "functions": {
+    "web/src/app/api/**/*.ts": {
+      "maxDuration": 10
+    }
+  },
+  "regions": ["gru1"],
+  "buildCommand": "pnpm prisma:generate && next build",
+  "installCommand": "pnpm install",
+  "env": {
+    "PRISMA_GENERATE_DATAPROXY": "true"
+  }
+}

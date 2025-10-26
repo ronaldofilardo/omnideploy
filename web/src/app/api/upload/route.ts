@@ -3,6 +3,7 @@ import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
 import { randomUUID } from 'crypto'
 
+// TODO: Migrar para serviço externo como Vercel Blob ou Cloudinary para reduzir uso de serverless functions
 const UPLOAD_DIR = join(process.cwd(), 'public', 'uploads')
 
 export async function POST(req: NextRequest) {

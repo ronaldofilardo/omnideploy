@@ -3,14 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+  "dev": "next dev",
+  "prisma:generate": "prisma generate",
+  "build": "pnpm prisma:generate && next build",
     "start": "next start",
     "test:smoke": "cross-env NODE_ENV=test playwright test --config playwright.config.ts --grep 'smoke'",
     "lint": "eslint",
   "test": "cross-env NODE_ENV=test vitest run --envFile=.env.test",
   "test:watch": "cross-env NODE_ENV=test vitest --envFile=.env.test",
   "test:coverage": "cross-env NODE_ENV=test vitest run --coverage --envFile=.env.test",
+  "dev:local": "cross-env NODE_ENV=development next dev --envFile=.env.local",
     "db:migrate:test": "cross-env DATABASE_URL=\"postgresql://postgres:123456@localhost:5432/omni_mvp_test?schema=public\" prisma migrate deploy"
   },
   "dependencies": {
