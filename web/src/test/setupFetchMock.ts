@@ -1,8 +1,8 @@
 // src/test/setupFetchMock.ts
-import { vi } from 'vitest'
+import { vi, beforeAll, afterAll } from 'vitest'
 
 beforeAll(() => {
-  vi.stubGlobal('fetch', async (input, init) => {
+  vi.stubGlobal('fetch', async (input: any, init: any) => {
     const url = typeof input === 'string' ? input : input.url
     const method = init?.method || 'GET'
 

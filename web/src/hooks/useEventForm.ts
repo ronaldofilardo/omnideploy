@@ -80,7 +80,7 @@ export function useEventForm({
       if (name === 'date') {
         validation = validateDate(value)
       } else if (name === 'startTime') {
-        validation = validateStartTime(value, state.date)
+        validation = validateStartTime(value)
       } else if (name === 'endTime') {
         validation = validateEndTime(value, state.startTime)
       }
@@ -131,8 +131,8 @@ export function useEventForm({
     setState((prev) => ({ ...prev, [field]: value }))
 
     // Limpa o erro do campo ao ser modificado
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }))
+    if (errors[field as keyof FormErrors]) {
+      setErrors((prev) => ({ ...prev, [field as keyof FormErrors]: undefined }))
     }
   }
 
@@ -148,7 +148,7 @@ export function useEventForm({
     const dateValidation = validateDate(state.date)
     if (!dateValidation.isValid) newErrors.date = dateValidation.error
 
-    const startTimeValidation = validateStartTime(state.startTime, state.date)
+    const startTimeValidation = validateStartTime(state.startTime)
     if (!startTimeValidation.isValid)
       newErrors.startTime = startTimeValidation.error
 

@@ -25,7 +25,9 @@ interface Event {
   observation?: string
   instructions?: boolean
   professional: Professional
-  files?: any[]
+  files?: any
+  userId: string
+  professionalId: string
 }
 
 interface EventDetailProps {
@@ -134,7 +136,7 @@ export default function EventDetail({ event }: EventDetailProps) {
             </Card>
 
             {/* Arquivos */}
-            {event.files && event.files.length > 0 && (
+            {event.files && Array.isArray(event.files) && event.files.length > 0 && (
               <Card>
                 <CardHeader>
                   <CardTitle>Anexos</CardTitle>

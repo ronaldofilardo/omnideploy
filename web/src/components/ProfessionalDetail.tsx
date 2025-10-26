@@ -21,9 +21,10 @@ interface Professional {
   id: string
   name: string
   specialty: string
-  address?: string
-  contact?: string
+  address?: string | null
+  contact?: string | null
   events: HealthEvent[]
+  userId: string
 }
 
 interface ProfessionalDetailProps {
