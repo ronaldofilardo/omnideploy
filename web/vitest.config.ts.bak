@@ -1,0 +1,40 @@
+import { defineConfig } from 'vitest/config'
+import react from '@vitejs/plugin-react'
+import path from 'path'
+
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    mockReset: true,
+    restoreMocks: true,
+    server: {
+      deps: {
+        inline: [/@radix-ui\/.*/],
+      },
+    },
+    setupFiles: ['./test/setup.ts', 'vitest-canvas-mock'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      exclude: [
+        'node_modules/',
+        'src/test/',
+        'e2e/',
+        '**/*.d.ts',
+        '**/*.config.*',
+        'coverage/',
+        '.next/',
+        'out/',
+      ],
+    },
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+})
+
+

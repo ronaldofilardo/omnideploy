@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  password      String
+  name          String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  events        HealthEvent[]
+  professionals Professional[]
+
+  @@map("users")
+}
+
+model Professional {
+  id        String        @id @default(cuid())
+  name      String
+  specialty String
+  address   String?
+  contact   String?
+  userId    String
+  events    HealthEvent[]
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("professionals")
+}
+
+model HealthEvent {
+  id             String       @id @default(cuid())
+  title          String
+  description    String?
+  date           String
+  startTime      String
+  endTime        String
+  type           EventType
+  userId         String
+  professionalId String
+  files          Json // Array de objetos: { slot, name, url, uploadDate?, expiryDate? }
+  professional   Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("health_events")
+}
+
+enum EventType {
+  CONSULTATION
+  EXAM
+  PROCEDURE
+  MEDICATION
+  OTHER
+}

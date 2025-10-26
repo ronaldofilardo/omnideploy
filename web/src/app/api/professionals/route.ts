@@ -1,0 +1,125 @@
+import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+
+// Usuário padrão
+const DEFAULT_USER_EMAIL = 'user@email.com'
+
+async function getDefaultUserId() {
+  const user = await prisma.user.findUnique({
+    where: { email: DEFAULT_USER_EMAIL },
+  })
+  if (!user) throw new Error('Usuário padrão não encontrado.')
+  return user.id
+}
+
+async function GET_SPECIALTIES() {
+  try {
+    const userId = await getDefaultUserId()
+    const professionals = await prisma.professional.findMany({
+      where: { userId },
+    })
+    const specialties = Array.from(
+      new Set(
+        professionals
+          .map((p) => p.specialty)
+          .filter((s) => s && s !== 'A ser definido')
+      )
+    )
+    return NextResponse.json(specialties)
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    return NextResponse.json({ error: message }, { status: 500 })
+  }
+}
+
+export async function PUT(req: Request) {
+  try {
+    const userId = await getDefaultUserId()
+    const body = await req.json()
+    const { id, name, specialty, address, contact } = body
+    if (!id || !name || !specialty) {
+      return NextResponse.json(
+        { error: 'ID, nome e especialidade são obrigatórios.' },
+        { status: 400 }
+      )
+    }
+    const professional = await prisma.professional.update({
+      where: {
+        id,
+        userId, // Garante que o profissional pertence ao usuário
+      },
+      data: { name, specialty, address, contact },
+    })
+    return NextResponse.json(professional)
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    return NextResponse.json({ error: message }, { status: 500 })
+  }
+}
+
+export async function GET(request: Request) {
+  const url = new URL(request.url)
+  const type = url.searchParams.get('type')
+
+  if (type === 'specialties') {
+    return GET_SPECIALTIES()
+  }
+
+  try {
+    const userId = await getDefaultUserId()
+    const professionals = await prisma.professional.findMany({
+      where: { userId },
+    })
+    return NextResponse.json(professionals)
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    return NextResponse.json({ error: message }, { status: 500 })
+  }
+}
+
+export async function POST(req: Request) {
+  try {
+    const userId = await getDefaultUserId()
+    const body = await req.json()
+    const { name, specialty, address, contact } = body
+    if (!name || !specialty) {
+      return NextResponse.json(
+        { error: 'Nome e especialidade são obrigatórios.' },
+        { status: 400 }
+      )
+    }
+    const professional = await prisma.professional.create({
+      data: { name, specialty, address, contact, userId },
+    })
+    return NextResponse.json(professional, { status: 201 })
+  } catch (error) {
+    // Log detalhado para debug
+    console.error('Erro ao criar profissional:', error)
+    const message = error instanceof Error ? error.message : String(error)
+    return NextResponse.json({ error: message }, { status: 500 })
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const userId = await getDefaultUserId()
+    const body = await req.json()
+    const { id } = body
+    if (!id) {
+      return NextResponse.json(
+        { error: 'ID do profissional é obrigatório.' },
+        { status: 400 }
+      )
+    }
+    await prisma.professional.delete({
+      where: {
+        id,
+        userId, // Garante que o profissional pertence ao usuário
+      },
+    })
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    return NextResponse.json({ error: message }, { status: 500 })
+  }
+}

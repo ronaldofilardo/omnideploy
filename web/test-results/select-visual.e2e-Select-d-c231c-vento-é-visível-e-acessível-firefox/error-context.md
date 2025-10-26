@@ -1,0 +1,93 @@
+# Page snapshot
+
+```yaml
+- generic:
+  - button "Open Next.js Dev Tools" [ref=e6] [cursor=pointer]:
+    - img [ref=e7]
+  - alert
+  - generic:
+    - generic:
+      - generic:
+        - heading [level=1]: OmniSaúde
+        - paragraph: Tudo em suas mãos
+      - navigation:
+        - generic:
+          - button:
+            - img
+            - generic: Timeline
+          - button:
+            - img
+            - generic: Profissionais
+          - button:
+            - img
+            - generic: Repositório
+          - button:
+            - img
+            - generic: Calendário
+      - generic:
+        - button:
+          - img
+          - generic: Sair
+    - generic:
+      - generic:
+        - generic:
+          - heading [level=1]: Minha Timeline
+          - button:
+            - img
+            - generic: Novo Evento
+        - paragraph: 26/10/2025 - domingo
+      - generic:
+        - generic: Ainda não existem eventos cadastrados
+  - dialog:
+    - generic:
+      - heading [level=2]: Novo Evento
+      - paragraph: Crie um novo evento de saúde.
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic: Tipo de Evento
+            - combobox [expanded]:
+              - generic: Selecione o tipo...
+              - img
+            - combobox
+          - generic:
+            - generic:
+              - generic: Profissional
+              - button: Novo
+            - combobox:
+              - generic: Selecione o profissional...
+              - img
+            - combobox
+          - generic:
+            - generic: Data do Evento
+            - textbox
+          - generic:
+            - generic:
+              - generic: Hora de Início
+              - textbox
+            - generic:
+              - generic: Hora de Fim
+              - textbox
+          - generic:
+            - generic: Observação
+            - textbox:
+              - /placeholder: Digite observações sobre o evento...
+            - paragraph: 0/500 caracteres
+      - generic:
+        - button: Criar Evento
+    - button:
+      - img
+      - generic: Close
+  - listbox [ref=e12]:
+    - option "Consulta" [active] [ref=e13] [cursor=pointer]:
+      - generic [ref=e15]: Consulta
+    - option "Exame" [ref=e16] [cursor=pointer]:
+      - generic [ref=e18]: Exame
+    - option "Procedimento" [ref=e19] [cursor=pointer]:
+      - generic [ref=e21]: Procedimento
+    - option "Medicação" [ref=e22] [cursor=pointer]:
+      - generic [ref=e24]: Medicação
+    - option "Outro" [ref=e25] [cursor=pointer]:
+      - generic [ref=e27]: Outro
+```
