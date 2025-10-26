@@ -1,0 +1,112 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: omni_mvp_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Generate Prisma client
+        run: cd web && pnpm db:generate
+
+      - name: Run database migrations for tests
+        run: cd web && pnpm db:migrate:test
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/omni_mvp_test?schema=public
+
+      - name: Seed test database
+        run: cd web && pnpm db:seed:test
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/omni_mvp_test?schema=public
+
+      - name: Run linting
+        run: cd web && pnpm lint
+
+      - name: Run unit tests with coverage
+        run: cd web && pnpm test:coverage
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/omni_mvp_test?schema=public
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./web/coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+
+      - name: Run E2E tests
+        run: cd web && pnpm test:e2e
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/omni_mvp_test?schema=public
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: web/test-results/
+          retention-days: 30
+
+  quality-gate:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check test coverage threshold
+        run: |
+          # Check if coverage meets minimum threshold
+          if [ -f "./web/coverage/lcov.info" ]; then
+            # Extract coverage percentage from lcov file
+            COVERAGE=$(grep -o 'LF:[0-9]*' ./web/coverage/lcov.info | head -1 | cut -d: -f2)
+            TOTAL=$(grep -o 'LH:[0-9]*' ./web/coverage/lcov.info | head -1 | cut -d: -f2)
+            if [ "$COVERAGE" -gt 0 ] && [ "$TOTAL" -gt 0 ]; then
+              PERCENTAGE=$((TOTAL * 100 / COVERAGE))
+              if [ $PERCENTAGE -lt 75 ]; then
+                echo "Coverage is below 75%: ${PERCENTAGE}%"
+                exit 1
+              fi
+            fi
+          fi
+
+      - name: Comment PR with coverage
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./web/coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
