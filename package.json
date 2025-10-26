@@ -23,7 +23,17 @@
 		"recharts": "^3.3.0"
 	},
 	"devDependencies": {
+		"@testing-library/jest-dom": "^6.9.1",
+		"@testing-library/react": "^16.3.0",
+		"@testing-library/user-event": "^14.6.1",
+		"@vitest/coverage-c8": "^0.33.0",
+		"happy-dom": "^20.0.8",
 		"jsdom": "^27.0.1",
-		"playwright": "^1.56.1"
+		"playwright": "^1.56.1",
+		"vitest": "^4.0.3"
+	},
+	"scripts": {
+		"autogit": "git add . && git commit -m \"${npm_config_msg:-Commit automático}\" && git push",
+		"deploy:vercel": "pnpm run autogit && vercel --prod"
 	}
 }
