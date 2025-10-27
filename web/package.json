@@ -16,7 +16,7 @@
     "test:coverage": "cross-env NODE_ENV=test vitest run --coverage --envFile=.env.test",
     "dev:local": "cross-env NODE_ENV=development next dev --envFile=.env.local",
     "db:migrate:test": "cross-env DATABASE_URL=\"postgresql://postgres:123456@localhost:5432/omni_mvp_test?schema=public\" prisma migrate deploy",
-    "db:seed": "tsx scripts/seed.ts"
+    "db:seed": "node scripts/seed.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
