@@ -51,9 +51,6 @@ model HealthEvent {
 }
 
 enum EventType {
-  CONSULTATION
-  EXAM
-  PROCEDURE
-  MEDICATION
-  OTHER
+  CONSULTA
+  EXAME
 }
