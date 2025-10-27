@@ -3,7 +3,8 @@ import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
 import { randomUUID } from 'crypto'
 
-// TODO: Migrar para serviço externo como Vercel Blob ou Cloudinary para reduzir uso de serverless functions
+// Configurações de upload para MVP (máximo 2KB)
+const MAX_FILE_SIZE = 2 * 1024 // 2048 bytes = 2KB
 const UPLOAD_DIR = join(process.cwd(), 'public', 'uploads')
 
 export async function POST(req: NextRequest) {
@@ -14,6 +15,14 @@ export async function POST(req: NextRequest) {
     if (!file) {
       return NextResponse.json(
         { error: 'Nenhum arquivo enviado' },
+        { status: 400 }
+      )
+    }
+
+    // Validar tamanho do arquivo (máximo 2KB para MVP)
+    if (file.size > MAX_FILE_SIZE) {
+      return NextResponse.json(
+        { error: `Arquivo deve ter no máximo ${MAX_FILE_SIZE / 1024}KB. Tamanho atual: ${(file.size / 1024).toFixed(1)}KB` },
         { status: 400 }
       )
     }
