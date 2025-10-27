@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
@@ -59,7 +60,7 @@ async function main() {
       date: '2024-12-20',
       startTime: '09:00',
       endTime: '10:00',
-      type: 'CONSULTATION' as const,
+      type: 'CONSULTA' as const,
       professionalId: (await prisma.professional.findFirst({
         where: { name: 'Dr. João Silva' },
       }))!.id,
@@ -70,7 +71,7 @@ async function main() {
       date: '2024-12-22',
       startTime: '14:00',
       endTime: '15:00',
-      type: 'EXAM' as const,
+      type: 'EXAME' as const,
       professionalId: (await prisma.professional.findFirst({
         where: { name: 'Dra. Maria Santos' },
       }))!.id,
