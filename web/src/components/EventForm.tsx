@@ -48,11 +48,8 @@ interface EventFormProps {
 }
 
 const eventTypeOptions = [
-  { value: 'CONSULTATION', label: 'Consulta' },
-  { value: 'EXAM', label: 'Exame' },
-  { value: 'PROCEDURE', label: 'Procedimento' },
-  { value: 'MEDICATION', label: 'Medicação' },
-  { value: 'OTHER', label: 'Outro' },
+  { value: 'CONSULTA', label: 'Consulta' },
+  { value: 'EXAME', label: 'Exame' },
 ]
 
 export function EventForm({
