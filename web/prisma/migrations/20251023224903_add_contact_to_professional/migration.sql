@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "EventType" AS ENUM ('CONSULTATION', 'EXAM', 'PROCEDURE', 'MEDICATION', 'OTHER');
+CREATE TYPE "EventType" AS ENUM ('CONSULTA', 'EXAME', 'PROCEDURE', 'MEDICATION', 'OTHER');
 
 -- CreateTable
 CREATE TABLE "users" (
@@ -9,7 +9,6 @@ CREATE TABLE "users" (
     "name" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
 
@@ -21,7 +20,6 @@ CREATE TABLE "professionals" (
     "address" TEXT,
     "contact" TEXT,
     "userId" TEXT NOT NULL,
-
     CONSTRAINT "professionals_pkey" PRIMARY KEY ("id")
 );
 
@@ -33,15 +31,16 @@ CREATE TABLE "health_events" (
     "date" TIMESTAMP(3) NOT NULL,
     "type" "EventType" NOT NULL,
     "userId" TEXT NOT NULL,
-
     CONSTRAINT "health_events_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
+CREATE UNIQUE INDEX "users_email_key" ON "users" ("email");
 
 -- AddForeignKey
-ALTER TABLE "professionals" ADD CONSTRAINT "professionals_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "professionals"
+ADD CONSTRAINT "professionals_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "health_events" ADD CONSTRAINT "health_events_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "health_events"
+ADD CONSTRAINT "health_events_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
