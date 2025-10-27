@@ -5,7 +5,7 @@
     }
   },
   "regions": ["gru1"],
-  "buildCommand": "pnpm check-deps && pnpm prisma:generate && pnpm prisma:db:push --accept-data-loss && next build",
+  "buildCommand": "pnpm check-deps && pnpm prisma:generate && pnpm prisma:db:push --force-reset && next build",
   "installCommand": "pnpm install",
   "env": {
     "PRISMA_GENERATE_DATAPROXY": "true"
