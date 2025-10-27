@@ -10,6 +10,7 @@ interface Professional {
   name: string
   specialty: string
   address?: string
+  contact?: string
 }
 
 interface ProfessionalsTabProps {
@@ -114,38 +115,52 @@ export function ProfessionalsTab({
   }
 
   return (
-    <div className="flex-1 w-[1160px] relative">
+    <div className="flex-1 w-full md:w-[1160px] relative">
       {/* Header */}
-      <div className="px-12 pt-12 pb-6">
-        <div className="flex items-start justify-between mb-4">
-          <h1 className="text-[#111827]">Profissionais</h1>
+      <div className="px-4 md:px-12 pt-12 pb-6">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+          <h1 className="text-[#111827] text-xl md:text-2xl">Profissionais</h1>
 
           {/* Add Professional Button */}
           <Button
             onClick={() => setIsAddModalOpen(true)}
-            className="bg-[#10B981] hover:bg-[#059669] text-white h-10 px-6 rounded-lg flex items-center gap-2"
+            className="bg-[#10B981] hover:bg-[#059669] text-white h-10 px-4 md:px-6 rounded-lg flex items-center gap-2 self-start sm:self-auto"
           >
             <Plus className="w-4 h-4" />
-            <span className="text-[14px]">Adicionar Profissional</span>
+            <span className="text-sm md:text-[14px]">Adicionar Profissional</span>
           </Button>
         </div>
       </div>
 
       {/* Grid de Cards */}
-      <div className="px-12 pt-10">
-        <div className="flex flex-wrap gap-8">
-          {professionals.map((professional) => (
-            <ProfessionalCard
-              key={professional.id}
-              id={professional.id}
-              name={professional.name}
-              specialty={professional.specialty}
-              address={professional.address}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          ))}
-        </div>
+      <div className="px-4 md:px-12 pt-6 md:pt-10">
+        {professionals.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-[#9CA3AF] text-lg mb-4">Nenhum profissional cadastrado</p>
+            <Button
+              onClick={() => setIsAddModalOpen(true)}
+              className="bg-[#10B981] hover:bg-[#059669] text-white h-10 px-6 rounded-lg flex items-center gap-2 mx-auto"
+            >
+              <Plus className="w-4 h-4" />
+              <span className="text-[14px]">Adicionar Primeiro Profissional</span>
+            </Button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
+            {professionals.map((professional) => (
+              <ProfessionalCard
+                key={professional.id}
+                id={professional.id}
+                name={professional.name}
+                specialty={professional.specialty}
+                address={professional.address}
+                contact={professional.contact}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Modal de Adição */}

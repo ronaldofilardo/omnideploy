@@ -201,17 +201,6 @@ describe('Timeline', () => {
     expect(eventCards.some(card => utils.queryByText(card, /Exame Dermatologia/))).toBe(true)
   })
 
-    const eventsWithDateTime: Event[] = [
-      {
-        ...mockEvents[0],
-        date: '2024-10-25T10:00:00Z',
-      },
-    ]
-    renderComponent(eventsWithDateTime)
-    const eventCards = screen.getAllByTestId('timeline-event-card')
-    const utils = require('@testing-library/react')
-    expect(eventCards.some(card => utils.queryByText(card, /Consulta Cardiologia/))).toBe(true)
-  })
   it('handles events with datetime strings', () => {
     const eventsWithDateTime: Event[] = [
       {
@@ -231,18 +220,6 @@ describe('Timeline', () => {
     expect(screen.queryByText('Consulta Cardiologia')).not.toBeInTheDocument()
   })
 
-    const eventsWithoutTimes: Event[] = [
-      {
-        ...mockEvents[0],
-        startTime: undefined,
-          utils.queryByText(card, /Consulta Cardiologia/) ||
-          utils.queryByText(card, /Exame Dermatologia/) ||
-          utils.queryByText(card, /Consulta Seguimento/
-    renderComponent(eventsWithoutTimes)
-    const eventCards = screen.getAllByTestId('timeline-event-card')
-    const utils = require('@testing-library/react')
-    expect(eventCards.some(card => utils.queryByText(card, /Consulta Cardiologia/))).toBe(true)
-  })
   it('renders events without times', () => {
     const eventsWithoutTimes: Event[] = [
       {
@@ -256,17 +233,6 @@ describe('Timeline', () => {
     expect(eventCards.some(card => (card.textContent || '').includes('Cardiologia'))).toBe(true)
   })
 
-    const eventsWithStatus: Event[] = [
-      {
-        ...mockEvents[0],
-        status: 'past',
-      } as any,
-    ]
-    renderComponent(eventsWithStatus)
-    const eventCards = screen.getAllByTestId('timeline-event-card')
-    const utils = require('@testing-library/react')
-    expect(eventCards.some(card => utils.queryByText(card, /Consulta Cardiologia/))).toBe(true)
-  })
   it('handles events with status from backend', () => {
     const eventsWithStatus: Event[] = [
       {
@@ -278,7 +244,6 @@ describe('Timeline', () => {
     const eventCards = screen.getAllByTestId('timeline-event-card')
     expect(eventCards.some(card => (card.textContent || '').includes('Cardiologia'))).toBe(true)
   })
-    // ...existing code...
 
   it('formats dates correctly in Brazilian Portuguese', () => {
     renderComponent()

@@ -1,11 +1,12 @@
-import { Calendar, Clock, FileText, LogOut, Users } from 'lucide-react'
+import { Calendar, Clock, FileText, LogOut, Users, X } from 'lucide-react'
 
 interface SidebarProps {
   activeMenu: string
   onMenuClick: (menu: string) => void
+  onClose?: () => void
 }
 
-export function Sidebar({ activeMenu, onMenuClick }: SidebarProps) {
+export function Sidebar({ activeMenu, onMenuClick, onClose }: SidebarProps) {
   const menuItems = [
     { id: 'timeline', label: 'Timeline', icon: Clock },
     { id: 'professionals', label: 'Profissionais', icon: Users },
@@ -14,7 +15,17 @@ export function Sidebar({ activeMenu, onMenuClick }: SidebarProps) {
   ]
 
   return (
-    <div className="w-[280px] h-screen bg-white border-r border-[#E5E7EB] flex flex-col">
+    <div className="w-[280px] h-screen bg-white border-r border-[#E5E7EB] flex flex-col relative">
+      {/* Close Button for Mobile */}
+      {onClose && (
+        <button
+          onClick={onClose}
+          className="md:hidden absolute top-4 right-4 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+        >
+          <X className="w-5 h-5 text-gray-500" />
+        </button>
+      )}
+
       {/* Header */}
       <div className="pt-8 pb-10 px-6">
         <h1 className="text-[#1E40AF] mb-1">OmniSaúde</h1>

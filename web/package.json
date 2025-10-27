@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "prisma:generate": "prisma generate",
+    "prisma:db:push": "prisma db push",
     "build": "pnpm check-deps && pnpm prisma:generate && next build",
     "start": "next start",
     "check-deps": "node scripts/check-dependencies.js",

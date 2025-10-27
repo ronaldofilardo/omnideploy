@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState, useCallback } from 'react'
-import { Plus } from 'lucide-react'
+import { Plus, Menu } from 'lucide-react'
 import { Sidebar } from './Sidebar'
 import { Timeline } from './Timeline'
 import NewEventModal from './NewEventModal'
@@ -40,6 +40,7 @@ interface Event {
 export function Dashboard({ onLogout }: DashboardProps) {
   const [activeMenu, setActiveMenu] = useState('timeline')
   const [isNewEventModalOpen, setIsNewEventModalOpen] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   // Debug: monitorar estado do modal
   useEffect(() => {
@@ -117,7 +118,13 @@ export function Dashboard({ onLogout }: DashboardProps) {
       onLogout()
     } else {
       setActiveMenu(menu)
+      // Fechar sidebar em dispositivos móveis após seleção
+      setIsSidebarOpen(false)
     }
+  }
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen)
   }
 
   // Get current date formatted
@@ -136,29 +143,60 @@ export function Dashboard({ onLogout }: DashboardProps) {
 
   return (
     <div className="flex h-screen bg-gradient-to-b from-[#F8FAFC] to-white overflow-hidden">
+      {/* Mobile Menu Button */}
+      <div className="md:hidden fixed top-4 left-4 z-50">
+        <Button
+          onClick={toggleSidebar}
+          variant="outline"
+          size="sm"
+          className="bg-white shadow-md"
+        >
+          <Menu className="w-4 h-4" />
+        </Button>
+      </div>
+
+      {/* Sidebar Overlay for Mobile */}
+      {isSidebarOpen && (
+        <div
+          className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <Sidebar activeMenu={activeMenu} onMenuClick={handleMenuClick} />
+      <div className={`
+        fixed md:relative z-50 h-screen transition-transform duration-300 ease-in-out
+        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+      `}>
+        <Sidebar
+          activeMenu={activeMenu}
+          onMenuClick={handleMenuClick}
+          onClose={() => setIsSidebarOpen(false)}
+        />
+      </div>
+
       {/* Main Content */}
       {activeMenu === 'timeline' && (
-        <div className="flex-1 w-[1160px] relative">
+        <div className="flex-1 w-full md:w-[1160px] relative ml-0 md:ml-0">
           {/* Header */}
-          <div className="px-12 pt-12 pb-6">
+          <div className="px-4 md:px-12 pt-12 pb-6">
             <div className="flex items-start justify-between mb-4">
-              <h1 className="text-[#111827]">Minha Timeline</h1>
+              <h1 className="text-[#111827] text-xl md:text-2xl">Minha Timeline</h1>
               {/* New Event Button */}
               <Button
                 onClick={() => setIsNewEventModalOpen(true)}
-                className="bg-[#10B981] hover:bg-[#059669] text-white h-10 px-6 rounded-lg flex items-center gap-2"
+                className="bg-[#10B981] hover:bg-[#059669] text-white h-10 px-4 md:px-6 rounded-lg flex items-center gap-2 text-sm md:text-base"
               >
                 <Plus className="w-4 h-4" />
-                <span className="text-[14px]">Novo Evento</span>
+                <span className="hidden sm:inline text-[14px]">Novo Evento</span>
+                <span className="sm:hidden text-[14px]">Novo</span>
               </Button>
             </div>
             {/* Current Date */}
-            <p className="text-[#6B7280] text-[16px]">{getCurrentDate()}</p>
+            <p className="text-[#6B7280] text-sm md:text-[16px]">{getCurrentDate()}</p>
           </div>
           {/* Timeline Content Area */}
-          <div className="px-12 py-6 overflow-y-auto h-full">
+          <div className="px-4 md:px-12 py-6 overflow-y-auto h-full">
             {(() => {
               console.log('[Dashboard] Rendering timeline, events:', events, 'professionals:', professionals)
               return null
