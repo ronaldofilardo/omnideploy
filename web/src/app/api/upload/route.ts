@@ -5,7 +5,9 @@ import { randomUUID } from 'crypto'
 
 // Configurações de upload para MVP (máximo 2KB)
 const MAX_FILE_SIZE = 2 * 1024 // 2048 bytes = 2KB
-const UPLOAD_DIR = join(process.cwd(), 'public', 'uploads')
+
+// Usar /tmp para Vercel (serverless) - arquivos são temporários mas funcionam
+const UPLOAD_DIR = process.env.NODE_ENV === 'production' ? '/tmp/uploads' : join(process.cwd(), 'public', 'uploads')
 
 export async function POST(req: NextRequest) {
   try {
@@ -41,7 +43,11 @@ export async function POST(req: NextRequest) {
     await writeFile(filePath, buffer)
 
     // Retornar URL do arquivo com data de upload
-    const fileUrl = `/uploads/${fileName}`
+    // Em produção (Vercel), usar URL relativa já que arquivos são servidos via API
+    const fileUrl = process.env.NODE_ENV === 'production'
+      ? `/api/uploads/${fileName}` // Servir via API route na Vercel
+      : `/uploads/${fileName}` // Servir diretamente do public na versão local
+
     const uploadDate = new Date().toISOString().split('T')[0] // YYYY-MM-DD em UTC
 
     return NextResponse.json({
