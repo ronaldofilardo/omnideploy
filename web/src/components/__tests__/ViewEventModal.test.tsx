@@ -10,7 +10,7 @@ describe('ViewEventModal', () => {
     title: 'Consulta Médica',
     description: 'Consulta de rotina',
     date: '2024-01-01',
-    type: 'CONSULTATION',
+  type: 'CONSULTA',
     professionalId: 'prof-1',
     startTime: '10:00',
     endTime: '11:00',
@@ -113,7 +113,7 @@ describe('ViewEventModal', () => {
   })
 
   it('handles different event types', () => {
-    const examEvent = { ...mockEvent, type: 'EXAM' }
+  const examEvent = { ...mockEvent, type: 'EXAME' }
     renderModal(true, examEvent)
 
     expect(screen.getByText('Exame')).toBeInTheDocument()

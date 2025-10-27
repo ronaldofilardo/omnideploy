@@ -32,7 +32,7 @@ describe('/api/repository', () => {
           id: 'event-1',
           title: 'Consulta Médica',
           date: '2025-01-15',
-          type: 'CONSULTATION',
+          type: 'CONSULTA',
           files: [
             { slot: 'result', name: 'exame.pdf', url: '/uploads/exame.pdf' },
           ],
@@ -46,7 +46,7 @@ describe('/api/repository', () => {
           id: 'event-2',
           title: 'Exame Laboratorial',
           date: '2025-01-20',
-          type: 'EXAM',
+          type: 'EXAME',
           files: [
             {
               slot: 'certificate',
@@ -146,7 +146,7 @@ describe('/api/repository', () => {
           id: 'event-1',
           title: 'Consulta Médica',
           date: '2025-01-15',
-          type: 'CONSULTATION',
+          type: 'CONSULTA',
           files: [
             { slot: 'result', name: 'exame.pdf', url: '/uploads/exame.pdf' },
           ],
@@ -160,7 +160,7 @@ describe('/api/repository', () => {
           id: 'event-2',
           title: 'Consulta Sem Arquivos',
           date: '2025-01-20',
-          type: 'CONSULTATION',
+          type: 'CONSULTA',
           files: [], // Empty array should be filtered out
           professional: {
             id: 'prof-2',
@@ -188,7 +188,7 @@ describe('/api/repository', () => {
           id: 'event-1',
           title: 'Evento Antigo',
           date: '2025-01-10',
-          type: 'CONSULTATION',
+          type: 'CONSULTA',
           files: [
             { slot: 'result', name: 'file.pdf', url: '/uploads/file.pdf' },
           ],
@@ -202,7 +202,7 @@ describe('/api/repository', () => {
           id: 'event-2',
           title: 'Evento Novo',
           date: '2025-01-20',
-          type: 'EXAM',
+          type: 'EXAME',
           files: [
             { slot: 'certificate', name: 'cert.pdf', url: '/uploads/cert.pdf' },
           ],

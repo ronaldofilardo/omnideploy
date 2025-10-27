@@ -38,7 +38,7 @@ describe('EditEventModal', () => {
     title: 'Consulta Médica',
     description: 'Consulta de rotina',
     date: '2024-01-01',
-    type: 'CONSULTATION',
+  type: 'CONSULTA',
     professionalId: 'prof-1',
     startTime: '10:00',
     endTime: '11:00',

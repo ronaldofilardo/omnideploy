@@ -50,7 +50,7 @@ describe('EventCard', () => {
     title: 'Consulta Médica',
     description: '',
     date: '2025-10-24',
-    type: 'CONSULTATION',
+  type: 'CONSULTA',
     professionalId: 'prof-1',
     startTime: '10:00',
     endTime: '11:00',

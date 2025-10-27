@@ -89,7 +89,7 @@ describe('EventForm', () => {
 
     expect(mockHandleFieldChange).toHaveBeenCalledWith(
       'eventType',
-      'CONSULTATION'
+  'CONSULTA'
     )
   })
 
@@ -241,7 +241,7 @@ describe('EventForm', () => {
 
   it('renders with pre-filled values correctly', () => {
     const filledFormState = {
-      eventType: 'CONSULTATION' as EventType,
+  eventType: 'CONSULTA' as EventType,
       selectedProfessional: '1',
       date: '2024-10-25',
       startTime: '10:00',
@@ -272,7 +272,7 @@ describe('EventForm', () => {
 
   it('renders with pre-filled values', () => {
     const filledFormState = {
-      eventType: 'CONSULTATION' as EventType,
+  eventType: 'CONSULTA' as EventType,
       selectedProfessional: '1',
       date: '2024-10-25',
       startTime: '10:00',

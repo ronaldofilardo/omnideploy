@@ -27,7 +27,7 @@ describe('Timeline', () => {
         date: '2025-10-26',
         startTime: '10:00',
         endTime: '11:00',
-        type: 'CONSULTATION',
+  type: 'CONSULTA',
         professionalId: 'prof1',
         files: []
       }

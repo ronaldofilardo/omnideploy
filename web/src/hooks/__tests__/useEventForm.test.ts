@@ -77,10 +77,10 @@ describe('useEventForm', () => {
       const { result } = renderHook(() => useEventForm(defaultProps))
 
       act(() => {
-  result.current.handleFieldChange('eventType', 'CONSULTATION')
+  result.current.handleFieldChange('eventType', 'CONSULTA')
       })
 
-  expect(result.current.formState.eventType).toBe('CONSULTATION')
+  expect(result.current.formState.eventType).toBe('CONSULTA')
     })
 
     it('deve limpar erros ao atualizar campo', () => {
@@ -125,7 +125,7 @@ describe('useEventForm', () => {
 
       act(() => {
         result.current.handleFieldChange('date', 'invalid-date')
-  result.current.handleFieldChange('eventType', 'CONSULTATION')
+  result.current.handleFieldChange('eventType', 'CONSULTA')
         result.current.handleFieldChange('selectedProfessional', 'prof-1')
         result.current.handleFieldChange('startTime', '10:00')
         result.current.handleFieldChange('endTime', '11:00')
@@ -145,7 +145,7 @@ describe('useEventForm', () => {
 
       act(() => {
         result.current.handleFieldChange('date', '2025-01-16')
-  result.current.handleFieldChange('eventType', 'CONSULTATION')
+  result.current.handleFieldChange('eventType', 'CONSULTA')
         result.current.handleFieldChange('selectedProfessional', 'prof-1')
         result.current.handleFieldChange('startTime', '11:00')
         result.current.handleFieldChange('endTime', '10:00')
@@ -183,7 +183,7 @@ describe('useEventForm', () => {
 
       // Preencher formulário válido
       act(() => {
-  result.current.handleFieldChange('eventType', 'CONSULTATION')
+  result.current.handleFieldChange('eventType', 'CONSULTA')
         result.current.handleFieldChange('selectedProfessional', 'prof-1')
         result.current.handleFieldChange('date', '2025-01-16')
         result.current.handleFieldChange('startTime', '10:00')
@@ -201,10 +201,10 @@ describe('useEventForm', () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: 'CONSULTATION',
+          title: 'CONSULTA',
           description: 'Consulta de rotina',
           date: '2025-01-16',
-          type: 'CONSULTATION',
+          type: 'CONSULTA',
           startTime: '10:00',
           endTime: '11:00',
           professionalId: 'prof-1',
@@ -227,7 +227,7 @@ describe('useEventForm', () => {
 
       // Preencher formulário válido
       act(() => {
-  result.current.handleFieldChange('eventType', 'CONSULTATION')
+  result.current.handleFieldChange('eventType', 'CONSULTA')
         result.current.handleFieldChange('selectedProfessional', 'prof-1')
         result.current.handleFieldChange('date', '2025-01-16')
         result.current.handleFieldChange('startTime', '10:00')
@@ -252,7 +252,7 @@ describe('useEventForm', () => {
 
       // Preencher formulário válido
       act(() => {
-  result.current.handleFieldChange('eventType', 'CONSULTATION')
+  result.current.handleFieldChange('eventType', 'CONSULTA')
         result.current.handleFieldChange('selectedProfessional', 'prof-1')
         result.current.handleFieldChange('date', '2025-01-16')
         result.current.handleFieldChange('startTime', '10:00')
@@ -295,7 +295,7 @@ describe('useEventForm', () => {
 
       // Tentar criar evento sobreposto
       act(() => {
-  result.current.handleFieldChange('eventType', 'EXAM')
+  result.current.handleFieldChange('eventType', 'EXAME')
         result.current.handleFieldChange('selectedProfessional', 'prof-1')
         result.current.handleFieldChange('date', '2025-01-16')
         result.current.handleFieldChange('startTime', '10:30')
@@ -348,7 +348,7 @@ describe('useEventForm', () => {
 
       // Criar evento não sobreposto
       act(() => {
-  result.current.handleFieldChange('eventType', 'EXAM')
+  result.current.handleFieldChange('eventType', 'EXAME')
         result.current.handleFieldChange('selectedProfessional', 'prof-1')
         result.current.handleFieldChange('date', '2025-01-16')
         result.current.handleFieldChange('startTime', '14:00')
@@ -375,7 +375,7 @@ describe('useEventForm', () => {
 
       // Preencher formulário
       act(() => {
-  result.current.handleFieldChange('eventType', 'CONSULTATION')
+  result.current.handleFieldChange('eventType', 'CONSULTA')
         result.current.handleFieldChange('selectedProfessional', 'prof-1')
         result.current.handleFieldChange('date', '2025-01-16')
         result.current.handleFieldChange('startTime', '10:00')
