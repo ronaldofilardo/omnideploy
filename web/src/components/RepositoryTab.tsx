@@ -255,7 +255,7 @@ export function RepositoryTab() {
                             (f) => f.slot === slotType
                           )
                           const labels: Record<string, string> = {
-                            request: 'Requisição',
+                            request: 'Solicitação',
                             authorization: 'Autorização',
                             certificate: 'Atestado',
                             result: 'Laudo/Resultado',

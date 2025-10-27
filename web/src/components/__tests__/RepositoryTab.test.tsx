@@ -213,9 +213,9 @@ describe('RepositoryTab', () => {
     render(<RepositoryTab />)
 
     await waitFor(() => {
-      // Verifica slot Requisição
-      const reqLabel = screen.getByText('Requisição')
-      expect(reqLabel.closest('div')?.textContent).toContain('Requisição')
+      // Verifica slot Solicitação
+      const reqLabel = screen.getByText('Solicitação')
+      expect(reqLabel.closest('div')?.textContent).toContain('Solicitação')
       expect(reqLabel.closest('div')?.textContent).toContain('requisicao.pdf')
 
       // Verifica slot Laudo/Resultado
