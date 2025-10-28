@@ -81,12 +81,15 @@ export async function POST(req: Request) {
   try {
     const userId = await getDefaultUserId()
     const body = await req.json()
-    const { name, specialty, address, contact } = body
-    if (!name || !specialty) {
+    let { name, specialty, address, contact } = body
+    if (!name) {
       return NextResponse.json(
-        { error: 'Nome e especialidade são obrigatórios.' },
+        { error: 'Nome é obrigatório.' },
         { status: 400 }
       )
+    }
+    if (!specialty) {
+      specialty = 'A ser definido'
     }
     const professional = await prisma.professional.create({
       data: { name, specialty, address, contact, userId },
