@@ -195,9 +195,15 @@ export function useEventForm({
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
-        setErrors({ overlap: errorData.error || 'Erro desconhecido.' })
-        return
+        let errorMsg = 'Falha na comunicação com o servidor. Tente novamente.';
+        try {
+          const errorData = await response.json();
+          if (errorData && errorData.error) {
+            errorMsg = errorData.error;
+          }
+        } catch {}
+        setErrors({ overlap: errorMsg });
+        return;
       }
 
       // Sucesso

@@ -1,13 +1,14 @@
 'use client'
 import { useEffect, useState, useCallback } from 'react'
 import { Plus, Menu } from 'lucide-react'
-import { Sidebar } from './Sidebar'
+import Sidebar from './Sidebar'
 import { Timeline } from './Timeline'
 import NewEventModal from './NewEventModal'
 import { ProfessionalsTab } from './ProfessionalsTab'
 import { RepositoryTab } from './RepositoryTab'
 import { CalendarTab } from './CalendarTab'
 import { Button } from './ui/button'
+import NotificationCenter from './NotificationCenter'
 
 interface DashboardProps {
   onLogout: () => void
@@ -254,6 +255,12 @@ export function Dashboard({ onLogout }: DashboardProps) {
           professionals={professionals}
           onBackToTimeline={() => setActiveMenu('timeline')}
         />
+      )}
+      {/* Notification Center */}
+      {activeMenu === 'notificacoes' && (
+        <div className="flex-1 w-full md:w-[1160px] relative ml-0 md:ml-0">
+          <NotificationCenter />
+        </div>
       )}
       {/* New Event Modal */}
       <NewEventModal

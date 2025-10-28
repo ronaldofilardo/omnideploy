@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog'
 import { Input } from './ui/input'
 import { Button } from './ui/button'
 import { Eye, EyeOff } from 'lucide-react'
@@ -94,6 +94,10 @@ export function CreateUserModal({ open, onOpenChange }: CreateUserModalProps) {
     <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="w-[480px] p-8 bg-white rounded-lg">
+          {/* Descrição oculta para acessibilidade */}
+          <VisuallyHidden>
+            <DialogDescription />
+          </VisuallyHidden>
           <VisuallyHidden>
             <DialogTitle>Criar Novo Usuário</DialogTitle>
           </VisuallyHidden>

@@ -150,7 +150,7 @@ export function CalendarTab({
   }
 
   return (
-    <div className="flex-1 w-[1160px] relative bg-[#EDEFF1] h-screen overflow-auto">
+    <div className="flex-1 w-[1160px] relative bg-[#EDEFF1] h-screen overflow-auto" data-testid="calendar-tab">
       {/* Header */}
       <div className="px-8 pt-6 relative">
         {/* Back to Timeline */}

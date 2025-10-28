@@ -115,7 +115,7 @@ export function ProfessionalsTab({
   }
 
   return (
-    <div className="flex-1 w-full md:w-[1160px] relative">
+    <div className="flex-1 w-full md:w-[1160px] relative" data-testid="professionals-tab">
       {/* Header */}
       <div className="px-4 md:px-12 pt-12 pb-6">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">

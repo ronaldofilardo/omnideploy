@@ -88,7 +88,7 @@ export function EventCard({
           ? 'Procedimento'
           : event.type === 'MEDICATION'
             ? 'Medicação'
-            : 'Outro'
+            : event.type
   const time =
     event.startTime && event.endTime
       ? `${event.startTime} - ${event.endTime}`

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Dialog, DialogContent } from './ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from './ui/dialog'
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { Input } from './ui/input'
 import { Textarea } from './ui/textarea'
 import { Button } from './ui/button'
@@ -55,7 +56,7 @@ export function EditProfessionalModal({
   const [contact, setContact] = useState(professional.contact || '')
   const [isAddSpecialtyModalOpen, setIsAddSpecialtyModalOpen] = useState(false)
   const [localSpecialties, setLocalSpecialties] =
-    useState<string[]>(specialties)
+    useState<string[]>(Array.isArray(specialties) ? specialties : [])
   const [showConfirmClose, setShowConfirmClose] = useState(false)
 
   useEffect(() => {
@@ -63,11 +64,13 @@ export function EditProfessionalModal({
       try {
         const response = await fetch('/api/professionals?type=specialties')
         if (response.ok) {
-          const data = await response.json()
+          let data = await response.json()
+          if (!Array.isArray(data)) data = []
           setLocalSpecialties(data)
         }
       } catch (error) {
         console.error('Erro ao buscar especialidades:', error)
+        setLocalSpecialties([])
       }
     }
     fetchSpecialties()
@@ -128,10 +131,14 @@ export function EditProfessionalModal({
     <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="max-w-[480px] p-0 gap-0 bg-white border-0 shadow-xl">
+          {/* Descrição e título ocultos para acessibilidade */}
+          <VisuallyHidden>
+            <DialogDescription />
+          </VisuallyHidden>
           <div className="pt-8 px-10">
-            <h2 className="text-[#1F2937] text-center m-0">
+            <DialogTitle className="text-[#1F2937] text-center m-0 text-lg leading-none font-semibold">
               Editar Profissional
-            </h2>
+            </DialogTitle>
           </div>
           <div className="px-10 pt-6 pb-8">
             <div className="flex flex-col gap-5">
@@ -154,7 +161,7 @@ export function EditProfessionalModal({
                     <SelectValue placeholder="Selecione uma especialidade" />
                   </SelectTrigger>
                   <SelectContent>
-                    {localSpecialties.map((spec) => (
+                    {(Array.isArray(localSpecialties) ? localSpecialties : []).map((spec) => (
                       <SelectItem
                         key={spec}
                         value={spec}

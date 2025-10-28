@@ -6,10 +6,11 @@ import { randomUUID } from 'crypto'
 // Configurações de upload para MVP (máximo 2KB)
 const MAX_FILE_SIZE = 2 * 1024 // 2048 bytes = 2KB
 
-// Usar /tmp para Vercel (serverless) - arquivos são temporários mas funcionam
-const UPLOAD_DIR = process.env.NODE_ENV === 'production' ? '/tmp/uploads' : join(process.cwd(), 'public', 'uploads')
+
 
 export async function POST(req: NextRequest) {
+  // Usar /tmp para Vercel (serverless) - arquivos são temporários mas funcionam
+  const UPLOAD_DIR = process.env.NODE_ENV === 'production' ? '/tmp/uploads' : join(process.cwd(), 'public', 'uploads')
   try {
     const formData = await req.formData()
     const file = formData.get('file') as File

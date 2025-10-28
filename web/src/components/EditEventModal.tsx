@@ -139,24 +139,12 @@ export default function EditEventModal({
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent
           className="max-w-[500px] p-0 gap-0 bg-[#F5F5F5] border-0 shadow-lg overflow-hidden"
-          aria-describedby="edit-event-description"
         >
-          <VisuallyHidden>
-            <DialogTitle>Editar Evento</DialogTitle>
-          </VisuallyHidden>
-          <DialogDescription id="edit-event-description" className="sr-only">
+          <DialogTitle id="edit-event-title" className="text-lg leading-none font-semibold text-[#1F2937] m-0 text-center bg-[#E5E7EB] py-4 px-6">
             Editar Evento
-          </DialogDescription>
-          <div className="bg-[#E5E7EB] py-4 px-6 text-center">
-            <span className="sr-only">
-              <DialogTitle id="edit-event-title">Editar Evento</DialogTitle>
-            </span>
-            <h2 className="text-[#1F2937] m-0">Editar Evento</h2>
-          </div>
+          </DialogTitle>
+          {/* Não renderizar DialogDescription se não houver descrição visível */}
           <div className="bg-white mx-6 my-6 rounded-lg p-6 shadow-sm">
-            <h3 className="text-[#374151] text-center mb-6 m-0">
-              Editar Evento
-            </h3>
             <div className="flex flex-col gap-4">
               <EventTypeSelect
                 value={formState.eventType}

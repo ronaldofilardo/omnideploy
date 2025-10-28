@@ -9,6 +9,7 @@ export async function PUT(req: Request) {
     endTime: string
     professionalId: string
     files?: any
+    notificationId?: string
   }
   let body: UpdateEventBody | undefined = undefined
   try {
@@ -23,6 +24,7 @@ export async function PUT(req: Request) {
       endTime,
       professionalId,
       files,
+      notificationId,
     } = body as UpdateEventBody
     if (
       !id ||
@@ -69,21 +71,61 @@ export async function PUT(req: Request) {
     const localDate = new Date(`${date}T12:00:00`) // Meio dia para evitar problemas de timezone
     const utcDate = localDate.toISOString().split('T')[0] // YYYY-MM-DD em UTC
 
-    const event = await prisma.healthEvent.update({
-      where: { id },
-      data: {
-        title,
-        description,
-        date: utcDate,
-        startTime,
-        endTime,
-        type,
-        professionalId,
-        files: files || [],
-      },
-    })
-    console.log(`[API Events] Evento atualizado com sucesso: ${event.id}`)
-    return NextResponse.json(event, { status: 200 })
+    // Se notificationId for fornecido, atualizar evento e arquivar notificação em transação
+    if (notificationId) {
+      const result = await prisma.$transaction(async (tx) => {
+        // Buscar evento existente
+        const existing = await tx.healthEvent.findUnique({ where: { id } })
+        if (!existing) {
+          throw new Error('Evento não encontrado')
+        }
+        // Verificar se já existe laudo no slot result
+        const filesArr = Array.isArray(files) ? files : []
+        const alreadyHasResult = Array.isArray(existing.files)
+          ? existing.files.some((f: any) => f.slot === 'result')
+          : false
+        if (alreadyHasResult) {
+          throw new Error('Evento já possui laudo associado no slot result')
+        }
+        // Atualizar evento
+        const event = await tx.healthEvent.update({
+          where: { id },
+          data: {
+            title,
+            description,
+            date: utcDate,
+            startTime,
+            endTime,
+            type,
+            professionalId,
+            files: filesArr,
+          },
+        })
+        await tx.notification.update({
+          where: { id: notificationId },
+          data: { status: 'ARCHIVED' },
+        })
+        return event
+      })
+      console.log(`[API Events] Evento atualizado e notificação arquivada: ${result.id}`)
+      return NextResponse.json(result, { status: 200 })
+    } else {
+      const event = await prisma.healthEvent.update({
+        where: { id },
+        data: {
+          title,
+          description,
+          date: utcDate,
+          startTime,
+          endTime,
+          type,
+          professionalId,
+          files: files || [],
+        },
+      })
+      console.log(`[API Events] Evento atualizado com sucesso: ${event.id}`)
+      return NextResponse.json(event, { status: 200 })
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     console.error(`[API Events] Erro ao atualizar evento:`, {
@@ -176,6 +218,7 @@ export async function POST(req: Request) {
     endTime: string
     professionalId: string
     files?: any
+    notificationId?: string
   }
   let body: EventBody | undefined = undefined
   try {
@@ -190,11 +233,13 @@ export async function POST(req: Request) {
       endTime,
       professionalId,
       files,
+      notificationId,
     } = body as EventBody
     console.log(`[API Events] Criando evento para usuário: ${userId}`, {
       title,
       date,
       type,
+      notificationId,
     })
     if (!title || !date || !type || !startTime || !endTime || !professionalId) {
       console.warn(`[API Events] Campos obrigatórios ausentes:`, {
@@ -248,21 +293,47 @@ export async function POST(req: Request) {
       )
     }
 
-    const event = await prisma.healthEvent.create({
-      data: {
-        title,
-        description,
-        date: utcDate,
-        startTime,
-        endTime,
-        type,
-        userId,
-        professionalId,
-        files: files || [], // Array de URLs dos arquivos
-      },
-    })
-    console.log(`[API Events] Evento criado com sucesso: ${event.id}`)
-    return NextResponse.json(event, { status: 201 })
+    // Se notificationId for fornecido, criar evento e arquivar notificação em transação
+    if (notificationId) {
+      const result = await prisma.$transaction(async (tx) => {
+        const event = await tx.healthEvent.create({
+          data: {
+            title,
+            description,
+            date: utcDate,
+            startTime,
+            endTime,
+            type,
+            userId,
+            professionalId,
+            files: files || [],
+          },
+        })
+        await tx.notification.update({
+          where: { id: notificationId },
+          data: { status: 'ARCHIVED' },
+        })
+        return event
+      })
+      console.log(`[API Events] Evento criado e notificação arquivada: ${result.id}`)
+      return NextResponse.json(result, { status: 201 })
+    } else {
+      const event = await prisma.healthEvent.create({
+        data: {
+          title,
+          description,
+          date: utcDate,
+          startTime,
+          endTime,
+          type,
+          userId,
+          professionalId,
+          files: files || [],
+        },
+      })
+      console.log(`[API Events] Evento criado com sucesso: ${event.id}`)
+      return NextResponse.json(event, { status: 201 })
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     console.error(`[API Events] Erro ao criar evento:`, {

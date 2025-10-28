@@ -1,3 +1,4 @@
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import React, { useState } from 'react'
 import {
   Dialog,
@@ -95,6 +96,10 @@ export default function NewEventModal({
         }}
       >
         <DialogContent className="max-w-[500px] p-0 gap-0 bg-gray-50 border-0 shadow-lg">
+          {/* Descrição oculta para acessibilidade */}
+          <VisuallyHidden>
+            <DialogDescription />
+          </VisuallyHidden>
           <DialogHeader className="bg-gray-200 py-4 px-6 text-center rounded-t-lg">
             <DialogTitle className="text-gray-800 m-0">Novo Evento</DialogTitle>
             <DialogDescription className="sr-only">

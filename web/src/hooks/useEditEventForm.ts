@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { validateDate } from '@/lib/validators/eventValidators'
 
 interface Professional {
@@ -68,31 +68,36 @@ export function useEditEventForm({
   const [errors, setErrors] = useState<FormErrors>({})
   const [events, setEvents] = useState<Event[]>([])
 
-  // Busca eventos para validação de sobreposição
-  const fetchEvents = useCallback(() => {
-    fetch('/api/events')
-      .then((res) => res.json())
-      .then((data) => setEvents(Array.isArray(data) ? data : []))
-      .catch(() => setEvents([]))
+  // Busca eventos para validação de sobreposição - com memoização do resultado
+  const fetchEvents = useCallback(async () => {
+    try {
+      const res = await fetch('/api/events')
+      const data = await res.json()
+      setEvents(Array.isArray(data) ? data : [])
+    } catch {
+      setEvents([])
+    }
   }, [])
 
-  // Carregar dados do evento
+  // Carregar dados do evento - com memoização dos valores
+  const initialState = useMemo(() => event ? {
+    eventType: event.type,
+    selectedProfessional: event.professionalId,
+    date: event.date.split('T')[0],
+    startTime: event.startTime || '',
+    endTime: event.endTime || '',
+    observation: event.observation || '',
+    hasInstructions: event.instructions || false,
+    instructions: '',
+  } : INITIAL_STATE, [event])
+
   useEffect(() => {
     if (event) {
-      fetchEvents()
-      setState({
-        eventType: event.type,
-        selectedProfessional: event.professionalId,
-        date: event.date.split('T')[0],
-        startTime: event.startTime || '',
-        endTime: event.endTime || '',
-        observation: event.observation || '',
-        hasInstructions: event.instructions || false,
-        instructions: '',
-      })
+      setState(initialState)
       setErrors({})
+      fetchEvents()
     }
-  }, [event, fetchEvents])
+  }, [event, fetchEvents, initialState])
 
   const handleFieldChange = <T extends keyof FormState>(
     field: T,
@@ -222,10 +227,10 @@ export function useEditEventForm({
     }
   }
 
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setState(INITIAL_STATE)
     setErrors({})
-  }
+  }, [])
 
   return {
     formState: state,

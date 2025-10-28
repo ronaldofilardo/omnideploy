@@ -6,7 +6,7 @@ const prisma = new PrismaClient()
 async function main() {
   // Criar usuário padrão
   const hashedPassword = await bcrypt.hash('1234', 10)
-  await prisma.user.upsert({
+  const result = await prisma.user.upsert({
     where: { email: 'user@email.com' },
     update: {},
     create: {
@@ -15,7 +15,7 @@ async function main() {
       name: 'Usuário Padrão',
     },
   })
-
+  console.log('Resultado do upsert:', result)
   console.log('Seed concluído com sucesso')
 }
 

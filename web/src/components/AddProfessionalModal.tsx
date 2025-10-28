@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogTitle } from './ui/dialog'
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from './ui/dialog'
 import { Input } from './ui/input'
 import { Textarea } from './ui/textarea'
 import { Button } from './ui/button'
@@ -53,11 +53,13 @@ export function AddProfessionalModal({
       try {
         const response = await fetch('/api/professionals?type=specialties')
         if (response.ok) {
-          const data = await response.json()
+          let data = await response.json()
+          if (!Array.isArray(data)) data = []
           setSpecialties(data)
         }
       } catch (error) {
         console.error('Erro ao buscar especialidades:', error)
+        setSpecialties([])
       }
     }
     fetchSpecialties()
@@ -121,7 +123,11 @@ export function AddProfessionalModal({
   return (
     <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="max-w-[480px] p-0 gap-0 bg-white border-0 shadow-xl">
+        <DialogContent className="max-w-[480px] p-0 gap-0 bg-white border-0 shadow-xl" data-testid="add-professional-modal">
+          {/* Descrição oculta para acessibilidade */}
+          <VisuallyHidden>
+            <DialogDescription />
+          </VisuallyHidden>
           <VisuallyHidden>
             <DialogTitle>Adicionar Novo Profissional</DialogTitle>
           </VisuallyHidden>
@@ -136,8 +142,9 @@ export function AddProfessionalModal({
             <div className="flex flex-col gap-5">
               {/* Nome */}
               <div className="space-y-2">
-                <label className="text-[#111827] text-sm block">Nome</label>
+                <label htmlFor="add-professional-name" className="text-[#111827] text-sm block">Nome</label>
                 <Input
+                  id="add-professional-name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full h-10 bg-[#F3F4F6] border border-[#D1D5DB] rounded text-[#374151] placeholder:text-[#9CA3AF] focus:ring-0 focus:ring-offset-0"
@@ -153,7 +160,7 @@ export function AddProfessionalModal({
                     <SelectValue placeholder="Selecione uma especialidade" />
                   </SelectTrigger>
                   <SelectContent>
-                    {specialties.map((spec, idx) => (
+                    {(Array.isArray(specialties) ? specialties : []).map((spec, idx) => (
                       <SelectItem
                         key={spec + '-' + idx}
                         value={spec}
@@ -175,8 +182,9 @@ export function AddProfessionalModal({
               </div>
               {/* Endereço */}
               <div className="space-y-2">
-                <label className="text-[#111827] text-sm block">Endereço</label>
+                <label htmlFor="add-professional-address" className="text-[#111827] text-sm block">Endereço</label>
                 <Textarea
+                  id="add-professional-address"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   className="w-full min-h-20 bg-[#F3F4F6] border border-[#D1D5DB] rounded text-[#374151] placeholder:text-[#9CA3AF] focus:ring-0 focus:ring-offset-0"
@@ -186,8 +194,9 @@ export function AddProfessionalModal({
               </div>
               {/* Contato */}
               <div className="space-y-2">
-                <label className="text-[#111827] text-sm block">Contato</label>
+                <label htmlFor="add-professional-contact" className="text-[#111827] text-sm block">Contato</label>
                 <Input
+                  id="add-professional-contact"
                   value={contact}
                   onChange={(e) => setContact(e.target.value)}
                   className="w-full h-10 bg-[#F3F4F6] border border-[#D1D5DB] rounded text-[#374151] placeholder:text-[#9CA3AF] focus:ring-0 focus:ring-offset-0"

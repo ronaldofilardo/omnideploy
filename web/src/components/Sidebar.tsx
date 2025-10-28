@@ -1,4 +1,6 @@
-import { Calendar, Clock, FileText, LogOut, Users, X } from 'lucide-react'
+"use client";
+import { Calendar, Clock, FileText, LogOut, Users, X, Bell } from 'lucide-react'
+import React, { useEffect, useState } from 'react';
 
 interface SidebarProps {
   activeMenu: string
@@ -6,13 +8,25 @@ interface SidebarProps {
   onClose?: () => void
 }
 
-export function Sidebar({ activeMenu, onMenuClick, onClose }: SidebarProps) {
+export default function Sidebar({ activeMenu, onMenuClick, onClose }: SidebarProps) {
   const menuItems = [
     { id: 'timeline', label: 'Timeline', icon: Clock },
     { id: 'professionals', label: 'Profissionais', icon: Users },
     { id: 'repositorio', label: 'Repositório', icon: FileText },
     { id: 'calendario', label: 'Calendário', icon: Calendar },
-  ]
+  ];
+
+  // Estado para contador de notificações
+  const [notificationCount, setNotificationCount] = useState(0);
+
+  useEffect(() => {
+    fetch('/api/notifications')
+      .then(res => res.json())
+      .then(data => {
+        const arr = Array.isArray(data) ? data : data.notifications || [];
+        setNotificationCount(arr.length);
+      });
+  }, []);
 
   return (
     <div className="w-[280px] h-screen bg-white border-r border-[#E5E7EB] flex flex-col relative">
@@ -33,12 +47,11 @@ export function Sidebar({ activeMenu, onMenuClick, onClose }: SidebarProps) {
       </div>
 
       {/* Menu Items */}
-      <nav className="flex-1 px-4">
+      <nav className="flex-1 px-4" data-testid="sidebar">
         <div className="flex flex-col gap-2">
           {menuItems.map((item) => {
-            const Icon = item.icon
-            const isActive = activeMenu === item.id
-
+            const Icon = item.icon;
+            const isActive = activeMenu === item.id;
             return (
               <button
                 key={item.id}
@@ -55,8 +68,21 @@ export function Sidebar({ activeMenu, onMenuClick, onClose }: SidebarProps) {
                 <Icon className="w-5 h-5" strokeWidth={2} />
                 <span className="text-[16px]">{item.label}</span>
               </button>
-            )
+            );
           })}
+          {/* Indicador de Notificações */}
+          <button
+            onClick={() => onMenuClick('notificacoes')}
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all mt-4 ${activeMenu === 'notificacoes' ? 'bg-[#10B981] text-white' : 'text-[#374151] hover:bg-gray-50'}`}
+          >
+            <div className="relative">
+              <Bell className="w-5 h-5" strokeWidth={2} />
+              {notificationCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">{notificationCount}</span>
+              )}
+            </div>
+            <span className="text-[16px]">Notificações</span>
+          </button>
         </div>
       </nav>
 
@@ -71,5 +97,5 @@ export function Sidebar({ activeMenu, onMenuClick, onClose }: SidebarProps) {
         </button>
       </div>
     </div>
-  )
+  );
 }

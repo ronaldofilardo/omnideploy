@@ -41,7 +41,17 @@ export function ViewEventModal({
   event,
   professional,
 }: ViewEventModalProps) {
-  if (!event || !professional) return null
+  if (!event || !professional) {
+    return null
+  }
+
+  // Forçar desmontagem completa quando event ou professional são null
+  // Usando uma key única baseada nos IDs para garantir que o componente seja completamente desmontado
+  const key = event?.id && professional?.id ? `${event.id}-${professional.id}` : null
+
+  if (!key) {
+    return null
+  }
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr)
@@ -64,11 +74,15 @@ export function ViewEventModal({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog key={key} open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="max-w-[500px] p-0 gap-0 bg-[#F5F5F5] border-0 shadow-lg overflow-hidden"
         aria-describedby="view-event-description"
       >
+        {/* Descrição oculta para acessibilidade */}
+        <VisuallyHidden>
+          <DialogDescription />
+        </VisuallyHidden>
         <VisuallyHidden>
           <DialogTitle>Detalhes do Evento</DialogTitle>
         </VisuallyHidden>

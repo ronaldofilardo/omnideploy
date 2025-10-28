@@ -41,18 +41,12 @@ export function DeleteEventModal({
         className="max-w-[400px] p-0 gap-0 bg-[#F5F5F5] border-0 shadow-lg overflow-hidden"
         aria-describedby="delete-event-description"
       >
-        <VisuallyHidden>
-          <DialogTitle>Excluir Evento</DialogTitle>
-        </VisuallyHidden>
+        <DialogTitle id="delete-event-title" className="text-lg leading-none font-semibold text-[#1F2937] m-0 text-center bg-[#E5E7EB] py-4 px-6">
+          Excluir Evento
+        </DialogTitle>
         <DialogDescription id="delete-event-description" className="sr-only">
           Confirmar exclusão do evento
         </DialogDescription>
-        <div className="bg-[#E5E7EB] py-4 px-6 text-center">
-          <span className="sr-only">
-            <DialogTitle id="delete-event-title">Excluir Evento</DialogTitle>
-          </span>
-          <h2 className="text-[#1F2937] m-0">Excluir Evento</h2>
-        </div>
         <div className="bg-white mx-6 my-6 rounded-lg p-6 shadow-sm">
           <div className="flex flex-col gap-4">
             <p className="text-[#374151] text-center">
@@ -93,7 +87,11 @@ export function DeleteEventModal({
         <div className="text-center pb-4 text-xs text-[#9CA3AF]">
           © 2025 Omni Saúde
         </div>
-      </DialogContent>
-    </Dialog>
+      {/* Descrição oculta para acessibilidade */}
+      <VisuallyHidden>
+        <DialogDescription />
+      </VisuallyHidden>
+    </DialogContent>
+  </Dialog>
   )
 }

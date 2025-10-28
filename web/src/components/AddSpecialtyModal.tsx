@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Dialog, DialogContent, DialogTitle } from './ui/dialog'
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from './ui/dialog'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { Input } from './ui/input'
 import { Button } from './ui/button'
@@ -59,15 +59,14 @@ export function AddSpecialtyModal({
     <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="max-w-[400px] p-0 gap-0 bg-white border-0 shadow-xl">
+          {/* Descrição oculta para acessibilidade */}
+          <VisuallyHidden>
+            <DialogDescription />
+          </VisuallyHidden>
           <VisuallyHidden>
             <DialogTitle>Adicionar Nova Especialidade</DialogTitle>
           </VisuallyHidden>
-          {/* Header */}
-          <div className="pt-8 px-10">
-            <h2 className="text-[#1F2937] text-center m-0">
-              Adicionar Nova Especialidade
-            </h2>
-          </div>
+          {/* Header removido: título duplicado, pois DialogTitle já cobre acessibilidade e visual */}
           {/* Form */}
           <div className="px-10 pt-6 pb-8">
             <div className="space-y-2 mb-8">
@@ -78,7 +77,7 @@ export function AddSpecialtyModal({
                 onChange={(e) => setSpecialtyName(e.target.value)}
                 placeholder="Digite o nome..."
                 className="w-full h-10 bg-[#F3F4F6] border border-[#D1D5DB] rounded text-[#374151] placeholder:text-[#9CA3AF] focus:ring-0 focus:ring-offset-0"
-                autoFocus
+                autoFocus={true}
               />
             </div>
             {/* Buttons */}
