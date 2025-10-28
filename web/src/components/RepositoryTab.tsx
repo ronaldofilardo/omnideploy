@@ -239,8 +239,17 @@ export function RepositoryTab() {
                       className="bg-white border border-gray-200 rounded-xl shadow-sm p-6"
                     >
                       <h3 className="font-bold text-lg text-gray-800 mb-4">
-                        {event.title} - {event.professional.name} -{' '}
-                        {event.startTime} - {event.endTime}
+                        {(() => {
+                          // Remove nome de arquivo do título, se houver
+                          // Exemplo: "Laudo: Requisição.jpg - Teste 04" => "Laudo: Teste 04"
+                          // Remove nome de arquivo após os dois pontos, se houver
+                          let cleanTitle = event.title.replace(/: [^:]+\.(jpg|jpeg|png|pdf|docx|doc|xls|xlsx|txt|csv) - /i, ': ');
+                          // Se ainda restar nome de arquivo, remove qualquer "tipo: arquivo.ext" no início
+                          cleanTitle = cleanTitle.replace(/: [^:]+\.(jpg|jpeg|png|pdf|docx|doc|xls|xlsx|txt|csv)/i, '');
+                          // Remove espaços e hífens duplicados
+                          cleanTitle = cleanTitle.replace(/\s*-\s*-\s*/g, ' - ').replace(/\s{2,}/g, ' ').trim();
+                          return `${cleanTitle} - ${event.professional.name} - ${event.startTime} - ${event.endTime}`;
+                        })()}
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {[

@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { Plus, Menu } from 'lucide-react'
 import Sidebar from './Sidebar'
 import { Timeline } from './Timeline'
@@ -51,6 +51,9 @@ export function Dashboard({ onLogout }: DashboardProps) {
     )
   }, [isNewEventModalOpen])
   const [events, setEvents] = useState<Event[]>([])
+  const [page, setPage] = useState(1)
+  const [hasMore, setHasMore] = useState(true)
+  const isFetching = useRef(false)
 
   // Estado único de profissionais
   const [professionals, setProfessionals] = useState<Professional[]>([])
@@ -73,23 +76,16 @@ export function Dashboard({ onLogout }: DashboardProps) {
       const data = await response.json()
       console.log('[Dashboard] Events fetched:', data)
       if (Array.isArray(data)) {
-        // Só atualiza se os dados realmente mudaram
-        setEvents((prevEvents) => {
-          if (JSON.stringify(prevEvents) !== JSON.stringify(data)) {
-            console.log('[Dashboard] Events updated:', data.length, 'events')
-            return data
-          }
-          console.log('[Dashboard] Events unchanged')
-          return prevEvents
-        })
+        setHasMore(false)
+        setEvents(data)
       } else {
+        setHasMore(false)
         console.warn('[Dashboard] Events data is not an array:', data)
       }
     } catch (error) {
       console.error('Error fetching events:', error)
       if (retryCount < 3) {
-        // Reduzido para 3 tentativas
-        const delay = Math.min(2000 * Math.pow(2, retryCount), 10000) // Máximo 10s
+        const delay = Math.min(2000 * Math.pow(2, retryCount), 10000)
         setTimeout(() => fetchEventsWithRetry(retryCount + 1), delay)
       }
     }
@@ -97,21 +93,25 @@ export function Dashboard({ onLogout }: DashboardProps) {
 
   // Buscar eventos do backend ao montar
   useEffect(() => {
-    fetchEventsWithRetry()
+    fetchEventsWithRetry(0)
+    setPage(1)
   }, [fetchEventsWithRetry])
 
-  // Polling automático a cada 60 segundos (reduzido para melhorar performance)
+  // Polling automático para atualizar eventos a cada 2 segundos
   useEffect(() => {
     const interval = setInterval(() => {
-      fetchEventsWithRetry()
-    }, 60000)
-
+      fetchEventsWithRetry(0)
+    }, 2000)
     return () => clearInterval(interval)
   }, [fetchEventsWithRetry])
 
+  // Scroll infinito
+  // Desabilita scroll infinito, pois backend não suporta paginação
+
   // Função para atualizar eventos após criar (otimizada)
   const refreshEvents = useCallback(() => {
-    fetchEventsWithRetry()
+    fetchEventsWithRetry(0)
+    setPage(1)
   }, [fetchEventsWithRetry])
 
   const handleMenuClick = (menu: string) => {
@@ -142,8 +142,17 @@ export function Dashboard({ onLogout }: DashboardProps) {
     return `${dateStr} - ${weekday}`
   }
 
+  // Função para atualizar profissionais
+  const refreshProfessionals = useCallback(() => {
+    fetch('/api/professionals')
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setProfessionals(data)
+      })
+  }, [])
+
   return (
-    <div className="flex h-screen bg-gradient-to-b from-[#F8FAFC] to-white overflow-hidden">
+  <div className="flex bg-linear-to-b from-[#F8FAFC] to-white">
       {/* Mobile Menu Button */}
       <div className="md:hidden fixed top-4 left-4 z-50">
         <Button
@@ -178,7 +187,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
 
       {/* Main Content */}
       {activeMenu === 'timeline' && (
-        <div className="flex-1 w-full md:w-[1160px] relative ml-0 md:ml-0">
+  <div className="flex-1 w-full md:w-[1160px] relative ml-0 md:ml-0 h-screen overflow-y-auto">
           {/* Header */}
           <div className="px-4 md:px-12 pt-12 pb-6">
             <div className="flex items-start justify-between mb-4">
@@ -197,7 +206,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
             <p className="text-[#6B7280] text-sm md:text-[16px]">{getCurrentDate()}</p>
           </div>
           {/* Timeline Content Area */}
-          <div className="px-4 md:px-12 py-6 overflow-y-auto h-full">
+          <div className="px-4 md:px-12 py-6 h-full overflow-y-auto">
             {(() => {
               console.log('[Dashboard] Rendering timeline, events:', events, 'professionals:', professionals)
               return null
@@ -259,7 +268,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
       {/* Notification Center */}
       {activeMenu === 'notificacoes' && (
         <div className="flex-1 w-full md:w-[1160px] relative ml-0 md:ml-0">
-          <NotificationCenter />
+          <NotificationCenter onProfessionalCreated={refreshProfessionals} />
         </div>
       )}
       {/* New Event Modal */}

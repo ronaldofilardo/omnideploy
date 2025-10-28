@@ -30,27 +30,18 @@ export default function CreateEventFromNotificationModal({ open, onClose, onSucc
     setLoading(true);
     setError(null);
     try {
-      // 1. Buscar profissional pelo nome
+      // 1. Sempre criar um novo profissional
       const doctorName = notification.payload.doctorName;
-      let professionalId = null;
-      const profRes = await fetch(`/api/professionals?name=${encodeURIComponent(doctorName)}`);
-      let profData = await profRes.json();
-      if (Array.isArray(profData) && profData.length > 0) {
-        professionalId = profData[0].id;
-      } else if (profData && profData.id) {
-        professionalId = profData.id;
-      } else {
-        // 2. Criar profissional se não existir
-        const createRes = await fetch('/api/professionals', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: doctorName, specialty: 'A ser definido' })
-        });
-        const createdProf = await createRes.json();
-        professionalId = createdProf?.id || createdProf?.insertedId || null;
-      }
-      if (!professionalId) throw new Error('Não foi possível obter/criar o profissional.');
-      // 3. Criar evento com o id do profissional
+      const createRes = await fetch('/api/professionals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: doctorName, specialty: 'A ser definido' })
+      });
+      const createdProf = await createRes.json();
+      const professionalId = createdProf?.id || createdProf?.insertedId || null;
+      if (!professionalId) throw new Error('Não foi possível criar o profissional.');
+
+      // 2. Criar evento com o id do profissional recém-criado
       const res = await fetch('/api/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

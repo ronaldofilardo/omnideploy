@@ -1,0 +1,23 @@
+src/tests/report.md
+# Relatório de Testes
+
+## Estado Atual dos Testes
+
+### Componentes
+- Criar arquivos de teste para os componentes que ainda não possuem testes.
+
+### Hooks
+- `useEditEventForm.test.ts`: Revisar e refatorar para cobrir todos os casos de uso.
+
+### Serviços
+- `eventService.test.ts`: Analisar e refatorar para melhorar a legibilidade e cobertura.
+- `professionalService.test.ts`: Revisar e refatorar para garantir que todas as funcionalidades sejam testadas.
+
+### Arquivos de Configuração
+- Consolidar `setup.ts` e `utils.ts` para evitar duplicação de código.
+
+## Cobertura de Código
+- [Inserir métricas de cobertura aqui]
+
+## Áreas que Necessitam de Atenção
+- [Listar áreas específicas que precisam de testes adicionais ou refatoração]

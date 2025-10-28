@@ -21,20 +21,25 @@ interface Professional {
   name: string;
 }
 
-export default function NotificationCenter() {
+interface NotificationCenterProps {
+  onProfessionalCreated?: () => void
+}
+
+export default function NotificationCenter({ onProfessionalCreated }: NotificationCenterProps) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [associateModal, setAssociateModal] = useState<{ open: boolean; notification: Notification | null }>({ open: false, notification: null });
   const [createModal, setCreateModal] = useState<{ open: boolean; notification: Notification | null }>({ open: false, notification: null });
   const [professionalId, setProfessionalId] = useState<string>('');
+  const [professionals, setProfessionals] = useState<Professional[]>([]);
 
-  // Buscar profissionais (pega o primeiro)
+  // Buscar profissionais (salva todos)
   useEffect(() => {
     fetch('/api/professionals')
       .then(res => res.json())
       .then(data => {
-        if (Array.isArray(data) && data.length > 0) setProfessionalId(data[0].id);
+        if (Array.isArray(data)) setProfessionals(data);
       });
   }, []);
 
@@ -59,6 +64,20 @@ export default function NotificationCenter() {
   if (loading) return <div className="flex items-center justify-center h-full text-gray-500 text-lg">Carregando notificações...</div>;
   if (error) return <div className="flex items-center justify-center h-full text-red-500 text-lg">{error}</div>;
   if (notifications.length === 0) return <div className="flex items-center justify-center h-full text-gray-400 text-lg">Sem notificações pendentes.</div>;
+
+  // Substituir setCreateModal para buscar o profissional correto
+  const handleCreateModal = (notification: Notification) => {
+    const doctorName = notification.payload.doctorName?.trim().toLowerCase();
+    const found = professionals.find(p => p.name.trim().toLowerCase() === doctorName);
+    setProfessionalId(found ? found.id : (professionals[0]?.id || ''));
+    setCreateModal({ open: true, notification });
+  };
+
+  // Atualizar profissionais após criar evento
+  const handleSuccess = () => {
+    fetchNotifications();
+    if (onProfessionalCreated) onProfessionalCreated();
+  }
 
   return (
     <div className="max-w-2xl mx-auto py-8 px-2">
@@ -90,7 +109,7 @@ export default function NotificationCenter() {
               </button>
               <button
                 className="bg-[#10B981] hover:bg-[#059669] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-                onClick={() => setCreateModal({ open: true, notification: n })}
+                onClick={() => handleCreateModal(n)}
               >
                 Criar novo evento
               </button>
@@ -110,7 +129,7 @@ export default function NotificationCenter() {
         <CreateEventFromNotificationModal
           open={createModal.open}
           onClose={() => setCreateModal({ open: false, notification: null })}
-          onSuccess={fetchNotifications}
+          onSuccess={handleSuccess}
           notification={createModal.notification}
           professionalId={professionalId}
         />

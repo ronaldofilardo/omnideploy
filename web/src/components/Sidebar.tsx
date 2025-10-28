@@ -20,12 +20,17 @@ export default function Sidebar({ activeMenu, onMenuClick, onClose }: SidebarPro
   const [notificationCount, setNotificationCount] = useState(0);
 
   useEffect(() => {
-    fetch('/api/notifications')
-      .then(res => res.json())
-      .then(data => {
-        const arr = Array.isArray(data) ? data : data.notifications || [];
-        setNotificationCount(arr.length);
-      });
+    const fetchNotifications = () => {
+      fetch('/api/notifications')
+        .then(res => res.json())
+        .then(data => {
+          const arr = Array.isArray(data) ? data : data.notifications || [];
+          setNotificationCount(arr.length);
+        });
+    };
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 2000);
+    return () => clearInterval(interval);
   }, []);
 
   return (
