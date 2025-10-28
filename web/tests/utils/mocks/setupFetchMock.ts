@@ -42,7 +42,7 @@ routeHandlers.set('/api/notifications', {
 })
 
 // Função auxiliar para encontrar handlers dinâmicos (com parâmetros na URL)
-const findDynamicHandler = (url: string): [string, Record<HttpMethod, Function>] | undefined => {
+const findDynamicHandler = (url: string): [string, Record<HttpMethod, (params?: any) => MockResponse>] | undefined => {
   // Matches /api/events/123, /api/professionals/456, etc
   const matches = {
     events: url.match(/^\/api\/events\/(\d+)$/),
@@ -55,10 +55,10 @@ const findDynamicHandler = (url: string): [string, Record<HttpMethod, Function>]
     const event = mockEvents.find(e => e.id === id)
     return [url, {
       GET: () => ({ status: event ? 200 : 404, body: event || { message: 'Evento não encontrado' } }),
-      PUT: (data) => ({ status: 200, body: { ...event, ...data, message: 'Evento atualizado' } }),
+  PUT: (data: any) => ({ status: 200, body: { ...event, ...data, message: 'Evento atualizado' } }),
       DELETE: () => ({ status: 200, body: { message: 'Evento deletado' } }),
       POST: () => ({ status: 405, body: { message: 'Método não permitido' } }),
-      PATCH: (data) => ({ status: 200, body: { ...event, ...data, message: 'Evento atualizado parcialmente' } })
+  PATCH: (data: any) => ({ status: 200, body: { ...event, ...data, message: 'Evento atualizado parcialmente' } })
     }]
   }
 
@@ -67,10 +67,10 @@ const findDynamicHandler = (url: string): [string, Record<HttpMethod, Function>]
     const professional = mockProfessionals.find(p => p.id === id)
     return [url, {
       GET: () => ({ status: professional ? 200 : 404, body: professional || { message: 'Profissional não encontrado' } }),
-      PUT: (data) => ({ status: 200, body: { ...professional, ...data, message: 'Profissional atualizado' } }),
+  PUT: (data: any) => ({ status: 200, body: { ...professional, ...data, message: 'Profissional atualizado' } }),
       DELETE: () => ({ status: 200, body: { message: 'Profissional deletado' } }),
       POST: () => ({ status: 405, body: { message: 'Método não permitido' } }),
-      PATCH: (data) => ({ status: 200, body: { ...professional, ...data, message: 'Profissional atualizado parcialmente' } })
+  PATCH: (data: any) => ({ status: 200, body: { ...professional, ...data, message: 'Profissional atualizado parcialmente' } })
     }]
   }
 
@@ -129,8 +129,8 @@ export const addMockRoute = (
   path: string,
   handlers: Partial<Record<HttpMethod, (params?: any) => MockResponse>>
 ) => {
-  const existingHandlers = routeHandlers.get(path) || {} as Record<HttpMethod, Function>
-  routeHandlers.set(path, { ...existingHandlers, ...handlers } as Record<HttpMethod, Function>)
+  const existingHandlers = routeHandlers.get(path) || {} as Partial<Record<HttpMethod, (params?: any) => MockResponse>>
+  routeHandlers.set(path, { ...existingHandlers, ...handlers } as Record<HttpMethod, (params?: any) => MockResponse>)
 }
 
 /**

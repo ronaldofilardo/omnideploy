@@ -13,8 +13,7 @@ interface TestWrapperProps {
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: false, // Desabilita retries para testes mais rápidos
-      cacheTime: 0  // Desabilita cache para testes isolados
+      retry: false // Desabilita retries para testes mais rápidos
     },
   },
 })

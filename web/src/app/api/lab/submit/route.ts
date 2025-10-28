@@ -9,7 +9,7 @@ const RATE_LIMIT = 10; // máx. 10 requisições por IP por hora
 const PAYLOAD_SIZE_LIMIT = 2 * 1024; // 2KB
 
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get('x-forwarded-for') || req.ip || 'unknown';
+  const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
   const now = Date.now();
   const rate = rateLimitMap.get(ip) || { count: 0, last: now };
   if (now - rate.last > 60 * 60 * 1000) {
