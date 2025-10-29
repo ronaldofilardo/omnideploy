@@ -63,7 +63,7 @@ export function Dashboard({ onLogout, userId }: DashboardProps) {
   // Buscar profissionais do backend ao montar
   useEffect(() => {
     if (!userId) return
-    fetch(`/api/professionals?userId=${encodeURIComponent(userId)}`)
+    fetch(`/api/professionals?userId=${encodeURIComponent(userId)}`, { cache: 'no-store' })
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) setProfessionals(data)
@@ -75,7 +75,7 @@ export function Dashboard({ onLogout, userId }: DashboardProps) {
     if (!userId) return
     try {
       console.log('[Dashboard] Fetching events...')
-      const response = await fetch(`/api/events?userId=${encodeURIComponent(userId)}`)
+  const response = await fetch(`/api/events?userId=${encodeURIComponent(userId)}`, { cache: 'no-store' })
       if (!response.ok) throw new Error('Failed to fetch events')
       const data = await response.json()
       console.log('[Dashboard] Events fetched:', data)
@@ -149,7 +149,7 @@ export function Dashboard({ onLogout, userId }: DashboardProps) {
   // Função para atualizar profissionais
   const refreshProfessionals = useCallback(() => {
     if (!userId) return
-    fetch(`/api/professionals?userId=${encodeURIComponent(userId)}`)
+    fetch(`/api/professionals?userId=${encodeURIComponent(userId)}`, { cache: 'no-store' })
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) setProfessionals(data)
