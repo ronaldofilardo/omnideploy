@@ -16,6 +16,8 @@ export interface Event {
   instructions?: boolean
   status?: 'past' | 'current' | 'future'
   files?: { slot: string; name: string; url: string }[] // Array de objetos de arquivos
+  doctorName?: string // Nome do médico solicitante externo
+  professionalName?: string // Nome do profissional externo (outro sistema)
 }
 
 interface Professional {
@@ -155,8 +157,12 @@ export const Timeline = memo(function Timeline({
               const professional = professionals.find(
                 (p) => p.id === event.professionalId
               )
-              console.log('[Timeline] Found professional:', professional ? professional.name : 'none')
-              // Se status vier do backend, usar, senão calcular localmente
+              let professionalName = professional ? professional.name : ''
+              let professionalAddress = professional?.address || ''
+              // Fallback: se não achou, tenta pegar do evento
+              if (!professionalName) {
+                professionalName = event.doctorName || event.professionalName || 'Profissional externo'
+              }
               const status =
                 event.status ||
                 getEventStatus(event.date, event.startTime, event.endTime)
@@ -184,8 +190,8 @@ export const Timeline = memo(function Timeline({
                       <EventCard
                         onUpdate={onUpdate}
                         event={event}
-                        professional={professional ? professional.name : ''}
-                        address={professional?.address || ''}
+                        professional={professionalName}
+                        address={professionalAddress}
                         status={status}
                         onView={() => onView?.(event)}
                         onFiles={() => onFiles?.(event)}

@@ -24,8 +24,8 @@ const mockAlert = vi.fn()
 global.alert = mockAlert
 
 describe('EditProfessionalModal', () => {
-  const mockOnOpenChange = vi.fn()
-  const mockOnSave = vi.fn()
+  let mockOnOpenChange: any
+  let mockOnSave: any
 
   const mockProfessional = {
     id: '1',
@@ -39,6 +39,8 @@ describe('EditProfessionalModal', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    mockOnOpenChange = vi.fn()
+    mockOnSave = vi.fn().mockResolvedValue(undefined)
     mockFetch.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve(mockSpecialties),
@@ -203,8 +205,16 @@ describe('EditProfessionalModal', () => {
     expect(mockAlert).not.toHaveBeenCalled()
   })
 
-  it('calls onSave with correct data when form is valid', () => {
-    renderModal(true)
+  it('calls onSave with correct data when form is valid', async () => {
+    render(
+      <EditProfessionalModal
+        open={true}
+        onOpenChange={mockOnOpenChange}
+        professional={mockProfessional}
+        specialties={mockSpecialties}
+        onSave={mockOnSave}
+      />
+    )
 
     const nameInput = screen.getByDisplayValue('Dr. Silva')
     fireEvent.change(nameInput, { target: { value: 'Dr. Silva Updated' } })
@@ -220,14 +230,16 @@ describe('EditProfessionalModal', () => {
     const saveButton = screen.getByText('Salvar')
     fireEvent.click(saveButton)
 
-    expect(mockOnSave).toHaveBeenCalledWith({
-      id: '1',
-      name: 'Dr. Silva Updated',
-      specialty: 'Cardiologia',
-      address: 'Rua das Rosas, 456',
-      contact: '987654321',
+    await waitFor(() => {
+      expect(mockOnSave).toHaveBeenCalledWith({
+        id: '1',
+        name: 'Dr. Silva Updated',
+        specialty: 'Cardiologia',
+        address: 'Rua das Rosas, 456',
+        contact: '987654321',
+      })
+      expect(mockOnOpenChange).toHaveBeenCalledWith(false)
     })
-    expect(mockOnOpenChange).toHaveBeenCalledWith(false)
   })
 
   it('trims whitespace from inputs', () => {

@@ -78,6 +78,12 @@ export default function NotificationCenter({ userId, onProfessionalCreated }: No
   // Atualizar profissionais após criar evento
   const handleSuccess = () => {
     fetchNotifications();
+    // Atualiza profissionais localmente também
+    fetch('/api/professionals')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setProfessionals(data);
+      });
     if (onProfessionalCreated) onProfessionalCreated();
   }
 
@@ -136,6 +142,7 @@ export default function NotificationCenter({ userId, onProfessionalCreated }: No
           notification={createModal.notification}
           professionalId={professionalId}
           userId={userId}
+          refreshProfessionals={onProfessionalCreated}
         />
       )}
     </div>

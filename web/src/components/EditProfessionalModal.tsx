@@ -24,24 +24,24 @@ import {
 } from './ui/alert-dialog'
 
 interface EditProfessionalModalProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  professional: {
-    id: string
-    name: string
-    specialty: string
-    address?: string
-    contact?: string
-  }
-  specialties: string[]
-  onSave: (updated: {
-    id: string
-    name: string
-    specialty: string
-    address: string
-    contact: string
-  }) => void
-}
+   open: boolean
+   onOpenChange: (open: boolean) => void
+   professional: {
+     id: string
+     name: string
+     specialty: string
+     address?: string
+     contact?: string
+   }
+   specialties: string[]
+   onSave: (updated: {
+     id: string
+     name: string
+     specialty: string
+     address: string
+     contact: string
+   }) => Promise<void>
+ }
 
 export function EditProfessionalModal({
   open,
@@ -60,13 +60,27 @@ export function EditProfessionalModal({
   const [showConfirmClose, setShowConfirmClose] = useState(false)
 
   useEffect(() => {
+    // Busca especialidades do usuário atual, se possível
     const fetchSpecialties = async () => {
       try {
-        const response = await fetch('/api/professionals?type=specialties')
-        if (response.ok) {
-          let data = await response.json()
-          if (!Array.isArray(data)) data = []
-          setLocalSpecialties(data)
+        // Tenta obter userId do profissional atual
+        let userId = undefined;
+        if (professional && professional.id) {
+          // Busca o profissional para pegar o userId (caso precise)
+          // Mas normalmente, o backend já filtra por userId do contexto
+          // Então, se specialties vierem vazias, faz fetch
+        }
+        // Se já veio specialties do props, prioriza elas
+        if (Array.isArray(specialties) && specialties.length > 0) {
+          setLocalSpecialties(specialties)
+        } else {
+          // Busca do backend
+          const response = await fetch('/api/professionals?type=specialties')
+          if (response.ok) {
+            let data = await response.json()
+            if (!Array.isArray(data)) data = []
+            setLocalSpecialties(data)
+          }
         }
       } catch (error) {
         console.error('Erro ao buscar especialidades:', error)
@@ -74,7 +88,7 @@ export function EditProfessionalModal({
       }
     }
     fetchSpecialties()
-  }, [])
+  }, [professional?.id, specialties])
 
   useEffect(() => {
     if (professional) {
@@ -86,7 +100,7 @@ export function EditProfessionalModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [professional?.id])
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!name.trim()) {
       alert('Por favor, preencha o nome do profissional.')
       return
@@ -95,14 +109,22 @@ export function EditProfessionalModal({
       alert('Por favor, selecione uma especialidade.')
       return
     }
-    onSave({
-      id: professional.id,
-      name: name.trim(),
-      specialty,
-      address: address.trim(),
-      contact: contact.trim(),
-    })
-    onOpenChange(false)
+
+    try {
+      await onSave({
+        id: professional.id,
+        name: name.trim(),
+        specialty,
+        address: address.trim(),
+        contact: contact.trim(),
+      })
+
+      // Fechar o modal após salvar
+      onOpenChange(false)
+    } catch (error) {
+      // Não fechar o modal se houve erro
+      console.error('Erro ao salvar profissional:', error)
+    }
   }
 
   const handleAddSpecialty = (newSpecialty: string) => {

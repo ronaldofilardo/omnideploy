@@ -54,7 +54,16 @@ export function ProfessionalsTab(props: ProfessionalsTabProps) {
     contact: string
   }) => {
     try {
-      const response = await fetch(`/api/professionals?userId=${encodeURIComponent(userId)}`, {
+      console.log('Enviando dados para edição:', {
+        id: updated.id,
+        name: updated.name,
+        specialty: updated.specialty,
+        address: updated.address || '',
+        contact: updated.contact || '',
+        userId
+      })
+
+      const response = await fetch('/api/professionals', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -63,17 +72,37 @@ export function ProfessionalsTab(props: ProfessionalsTabProps) {
           specialty: updated.specialty,
           address: updated.address || '',
           contact: updated.contact || '',
+          userId
         }),
       })
-      if (!response.ok) throw new Error('Erro ao editar profissional')
+
+      console.log('Resposta da API:', response.status, response.statusText)
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Erro da API (texto):', errorText)
+        let errorData
+        try {
+          errorData = JSON.parse(errorText)
+        } catch {
+          errorData = { error: errorText }
+        }
+        console.error('Erro da API (parsed):', errorData)
+        throw new Error(errorData.error || 'Erro ao editar profissional')
+      }
+
       const savedProfessional = await response.json()
+      console.log('Profissional salvo:', savedProfessional)
+
       setProfessionals(
         professionals.map((p) =>
           p.id === savedProfessional.id ? savedProfessional : p
         )
       )
-    } catch {
-      alert('Erro ao editar profissional.')
+    } catch (error) {
+      console.error('Erro ao editar profissional:', error)
+      alert(`Erro ao editar profissional: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
+      throw error // Re-throw para que o modal não feche
     }
   }
 

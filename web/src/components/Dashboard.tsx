@@ -41,7 +41,13 @@ interface Event {
 }
 
 export function Dashboard({ onLogout, userId }: DashboardProps) {
-  const [activeMenu, setActiveMenu] = useState('timeline')
+  const [activeMenu, setActiveMenu] = useState(() => {
+    // Carregar aba ativa do localStorage ou usar 'timeline' como padrão
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('activeMenu') || 'timeline'
+    }
+    return 'timeline'
+  })
   const [isNewEventModalOpen, setIsNewEventModalOpen] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
@@ -123,6 +129,8 @@ export function Dashboard({ onLogout, userId }: DashboardProps) {
       onLogout()
     } else {
       setActiveMenu(menu)
+      // Salvar aba ativa no localStorage
+      localStorage.setItem('activeMenu', menu)
       // Fechar sidebar em dispositivos móveis após seleção
       setIsSidebarOpen(false)
     }

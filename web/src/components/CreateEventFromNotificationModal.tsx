@@ -17,9 +17,10 @@ interface CreateEventFromNotificationModalProps {
   };
   professionalId: string;
   userId: string;
+  refreshProfessionals?: () => void;
 }
 
-export default function CreateEventFromNotificationModal({ open, onClose, onSuccess, notification, professionalId, userId }: CreateEventFromNotificationModalProps) {
+export default function CreateEventFromNotificationModal({ open, onClose, onSuccess, notification, professionalId, userId, refreshProfessionals }: CreateEventFromNotificationModalProps) {
   const [title, setTitle] = useState('Laudo: ' + notification.payload.report.fileName);
   const [date, setDate] = useState(notification.payload.examDate);
   const [startTime, setStartTime] = useState('09:00');
@@ -33,10 +34,14 @@ export default function CreateEventFromNotificationModal({ open, onClose, onSucc
     try {
       // 1. Sempre criar um novo profissional
       const doctorName = notification.payload.doctorName;
-  const createRes = await fetch('/api/professionals', {
+      const createRes = await fetch(`/api/professionals?userId=${encodeURIComponent(userId)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: doctorName, specialty: 'A ser definido' })
+        body: JSON.stringify({ 
+          name: doctorName, 
+          specialty: 'A ser definido',
+          userId: userId 
+        })
       });
       const createdProf = await createRes.json();
       const professionalId = createdProf?.id || createdProf?.insertedId || null;
@@ -63,6 +68,7 @@ export default function CreateEventFromNotificationModal({ open, onClose, onSucc
         })
       });
       if (!res.ok) throw new Error('Erro ao criar evento.');
+      if (refreshProfessionals) await refreshProfessionals();
       onSuccess();
       onClose();
     } catch (e) {

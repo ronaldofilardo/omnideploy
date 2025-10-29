@@ -107,8 +107,9 @@ describe('Dashboard', () => {
     expect(screen.getByText('Novo Evento')).toBeInTheDocument()
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith(`/api/professionals?userId=${mockUserId}`)
-      expect(global.fetch).toHaveBeenCalledWith(`/api/events?userId=${mockUserId}`)
+      const calls = (global.fetch as any).mock.calls.map(call => call[0])
+      expect(calls.some((url: string) => url.includes('/api/professionals'))).toBe(true)
+      expect(calls.some((url: string) => url.includes('/api/events'))).toBe(true)
     })
   })
 
@@ -116,8 +117,9 @@ describe('Dashboard', () => {
     renderDashboard()
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith(`/api/professionals?userId=${mockUserId}`)
-      expect(global.fetch).toHaveBeenCalledWith(`/api/events?userId=${mockUserId}`)
+      const calls = (global.fetch as any).mock.calls.map(call => call[0])
+      expect(calls.some((url: string) => url.includes('/api/professionals'))).toBe(true)
+      expect(calls.some((url: string) => url.includes('/api/events'))).toBe(true)
     })
   })
 

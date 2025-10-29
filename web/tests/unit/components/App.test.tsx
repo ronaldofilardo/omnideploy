@@ -33,14 +33,18 @@ afterAll(() => {
 })
 
 describe('App', () => {
+
   beforeEach(() => {
     vi.clearAllMocks()
+    // Garante que não há usuário logado
+    window.localStorage.clear()
   })
 
-  it('renders login screen initially', () => {
-    render(<App />)
 
-    expect(screen.getByText('Omni Saúde')).toBeInTheDocument()
+  it('renders login screen initially', async () => {
+    render(<App />)
+    // Aguarda a tela de login aparecer
+    expect(await screen.findByText('Omni Saúde')).toBeInTheDocument()
     expect(screen.getByText('Tudo em Suas mãos')).toBeInTheDocument()
     expect(screen.getByPlaceholderText('usuário@email.com')).toBeInTheDocument()
     expect(screen.getByPlaceholderText('Senha')).toBeInTheDocument()
