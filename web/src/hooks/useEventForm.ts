@@ -7,7 +7,7 @@ import {
 } from '@/lib/validators/eventValidators'
 import { EventType } from '@prisma/client'
 
-// Tipos locais para o formulário
+// Interfaces
 interface Professional {
   id: string
   name: string
@@ -25,6 +25,7 @@ interface Event {
 interface UseEventFormProps {
   professionals: Professional[]
   onFormSubmitSuccess: () => void
+  userId: string
 }
 
 interface FormState {
@@ -45,6 +46,7 @@ interface FormErrors {
   overlap?: string
 }
 
+// Constantes
 const INITIAL_STATE: FormState = {
   eventType: '',
   selectedProfessional: '',
@@ -54,21 +56,20 @@ const INITIAL_STATE: FormState = {
   observation: '',
 }
 
-export function useEventForm({
-  professionals,
-  onFormSubmitSuccess,
-}: UseEventFormProps) {
+// Hook principal
+export function useEventForm(props: UseEventFormProps) {
+  const { professionals, onFormSubmitSuccess, userId } = props
   const [state, setState] = useState<FormState>(INITIAL_STATE)
   const [errors, setErrors] = useState<FormErrors>({})
   const [events, setEvents] = useState<Event[]>([])
 
   // Busca eventos existentes para validação de sobreposição
   const fetchEvents = useCallback(() => {
-    fetch('/api/events')
+    fetch(`/api/events?userId=${encodeURIComponent(userId)}`)
       .then((res) => res.json())
       .then((data) => setEvents(Array.isArray(data) ? data : []))
       .catch(() => setEvents([]))
-  }, [])
+  }, [userId])
 
   useEffect(() => {
     fetchEvents()
@@ -86,7 +87,7 @@ export function useEventForm({
       }
       return validation
     },
-    [state.date, state.startTime]
+    [state.startTime]
   )
 
   const checkOverlap = useCallback(
@@ -97,25 +98,18 @@ export function useEventForm({
       professionalId: string
     ) => {
       if (!date || !startTime || !endTime || !professionalId) return null
-
-      // Usar strings diretamente para evitar problemas de timezone
       const newEventStartStr = `${date}T${startTime}:00`
       const newEventEndStr = `${date}T${endTime}:00`
-
       const overlappingEvent = events.find((e) => {
         if (e.professionalId !== professionalId) return false
         const eventDate = e.date.split('T')[0]
         if (eventDate !== date) return false
-
         const existingStartStr = `${eventDate}T${e.startTime}:00`
         const existingEndStr = `${eventDate}T${e.endTime}:00`
-
-        // Comparar strings diretamente para evitar timezone issues
         return (
           newEventStartStr < existingEndStr && newEventEndStr > existingStartStr
         )
       })
-
       if (overlappingEvent) {
         return `Conflito: Este profissional já possui um evento das ${overlappingEvent.startTime} às ${overlappingEvent.endTime}.`
       }
@@ -129,8 +123,6 @@ export function useEventForm({
     value: FormState[T]
   ) => {
     setState((prev) => ({ ...prev, [field]: value }))
-
-    // Limpa o erro do campo ao ser modificado
     if (errors[field as keyof FormErrors]) {
       setErrors((prev) => ({ ...prev, [field as keyof FormErrors]: undefined }))
     }
@@ -140,7 +132,7 @@ export function useEventForm({
     e.preventDefault()
     const newErrors: FormErrors = {}
 
-    // Validações individuais
+    // Validações
     if (!state.eventType) newErrors.eventType = 'Selecione um tipo de evento.'
     if (!state.selectedProfessional)
       newErrors.selectedProfessional = 'Selecione um profissional.'
@@ -149,8 +141,7 @@ export function useEventForm({
     if (!dateValidation.isValid) newErrors.date = dateValidation.error
 
     const startTimeValidation = validateStartTime(state.startTime)
-    if (!startTimeValidation.isValid)
-      newErrors.startTime = startTimeValidation.error
+    if (!startTimeValidation.isValid) newErrors.startTime = startTimeValidation.error
 
     const endTimeValidation = validateEndTime(state.endTime, state.startTime)
     if (!endTimeValidation.isValid) newErrors.endTime = endTimeValidation.error
@@ -172,38 +163,37 @@ export function useEventForm({
     }
 
     setErrors(newErrors)
-
     if (Object.keys(newErrors).length > 0) {
       return
     }
 
     // Submissão para a API
     try {
-      const response = await fetch('/api/events', {
+      const response = await fetch(`/api/events?userId=${encodeURIComponent(userId)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: state.eventType, // O título é derivado do tipo
+          title: state.eventType,
           description: state.observation,
-          date: state.date, // Já vem como string YYYY-MM-DD do input type="date"
+          date: state.date,
           type: state.eventType,
           startTime: state.startTime,
           endTime: state.endTime,
           professionalId: state.selectedProfessional,
-          files: [], // Gerenciamento de arquivos é feito em outro modal
+          files: [],
         }),
       })
 
       if (!response.ok) {
-        let errorMsg = 'Falha na comunicação com o servidor. Tente novamente.';
+        let errorMsg = 'Falha na comunicação com o servidor. Tente novamente.'
         try {
-          const errorData = await response.json();
+          const errorData = await response.json()
           if (errorData && errorData.error) {
-            errorMsg = errorData.error;
+            errorMsg = errorData.error
           }
         } catch {}
-        setErrors({ overlap: errorMsg });
-        return;
+        setErrors({ overlap: errorMsg })
+        return
       }
 
       // Sucesso

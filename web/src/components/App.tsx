@@ -10,28 +10,57 @@ export default function App() {
   const [password, setPassword] = useState('')
   const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [userId, setUserId] = useState<string>('')
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     // Handle login logic here
     console.log('Login attempt:', { email, password })
-    // For demo purposes, login immediately
-    setIsLoggedIn(true)
+    // Buscar o id do usuário pelo e-mail
+    try {
+      const res = await fetch(`/api/users/by-email?email=${encodeURIComponent(email)}`)
+      if (!res.ok) throw new Error('Usuário não encontrado')
+      const data = await res.json()
+      if (!data.id) throw new Error('ID do usuário não encontrado')
+      setUserId(data.id)
+      setIsLoggedIn(true)
+    } catch (err) {
+      alert('Erro ao autenticar: ' + (err instanceof Error ? err.message : err))
+    }
   }
 
   const handleLogout = () => {
     setIsLoggedIn(false)
     setEmail('')
     setPassword('')
+    setUserId('')
   }
 
   const handleNewUser = () => {
     setIsCreateUserModalOpen(true)
   }
 
-  // Show Dashboard if logged in
-  if (isLoggedIn) {
-    return <Dashboard onLogout={handleLogout} />
+  const handleRegistered = async (u: { email: string; name?: string }) => {
+    // Preenche o login e autentica automaticamente para agilizar o fluxo de desenvolvimento
+    setEmail(u.email)
+    setPassword('')
+    setIsCreateUserModalOpen(false)
+    // Buscar o id do usuário recém-criado
+    try {
+      const res = await fetch(`/api/users/by-email?email=${encodeURIComponent(u.email)}`)
+      if (!res.ok) throw new Error('Usuário não encontrado')
+      const data = await res.json()
+      if (!data.id) throw new Error('ID do usuário não encontrado')
+      setUserId(data.id)
+      setIsLoggedIn(true)
+    } catch (err) {
+      alert('Erro ao autenticar: ' + (err instanceof Error ? err.message : err))
+    }
   }
+
+  // Show Dashboard if logged in
+    if (isLoggedIn) {
+      return <Dashboard onLogout={handleLogout} userId={userId} />
+    }
 
   // Show Login Screen
   return (
@@ -80,6 +109,7 @@ export default function App() {
       <CreateUserModal
         open={isCreateUserModalOpen}
         onOpenChange={setIsCreateUserModalOpen}
+        onRegistered={handleRegistered}
       />
     </div>
   )

@@ -10,10 +10,11 @@ describe('POST /api/professionals', () => {
   let createdUserId: string
 
   beforeAll(async () => {
-    // Cria usuário padrão para o teste
+    // Cria usuário com e-mail aleatório para evitar conflito de chave única
+    const randomEmail = `user_${Date.now()}_${Math.floor(Math.random()*10000)}@email.com`
     const user = await prisma.user.create({
       data: {
-        email: 'user@email.com',
+        email: randomEmail,
         name: 'Usuário Teste',
         password: 'test',
       },

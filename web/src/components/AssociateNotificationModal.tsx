@@ -22,9 +22,10 @@ interface AssociateNotificationModalProps {
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  userId: string;
 }
 
-export default function AssociateNotificationModal({ notification, open, onClose, onSuccess }: AssociateNotificationModalProps) {
+export default function AssociateNotificationModal({ notification, open, onClose, onSuccess, userId }: AssociateNotificationModalProps) {
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<string>('');
   const [loading, setLoading] = useState(false);
@@ -40,13 +41,13 @@ export default function AssociateNotificationModal({ notification, open, onClose
   }, [open]);
 
   useEffect(() => {
-    if (open) {
-      fetch('/api/events')
+    if (open && userId) {
+      fetch(`/api/events?userId=${encodeURIComponent(userId)}`)
         .then(res => res.json())
         .then(data => setEvents(Array.isArray(data) ? data : []))
         .catch(() => setError('Erro ao buscar eventos.'));
     }
-  }, [open]);
+  }, [open, userId]);
 
   const handleAssociate = async () => {
     if (!selectedEvent || !notification) return;

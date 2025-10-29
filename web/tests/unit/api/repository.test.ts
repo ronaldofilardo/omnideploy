@@ -25,8 +25,7 @@ describe('/api/repository', () => {
   })
 
   describe('GET', () => {
-    it('should return events with files for default user', async () => {
-      const mockUser = { id: 'user-1' }
+    it('should return events with files for userId in query', async () => {
       const mockEvents = [
         {
           id: 'event-1',
@@ -62,18 +61,14 @@ describe('/api/repository', () => {
         },
       ]
 
-  mockPrisma.user.findUnique.mockResolvedValue(mockUser)
       mockPrisma.healthEvent.findMany.mockResolvedValue(mockEvents)
 
-      const response = await GET()
+      const req = { url: 'http://localhost/api/repository?userId=user-1' } as Request
+      const response = await GET(req)
       const data = await response.json()
 
       expect(response.status).toBe(200)
       expect(data).toEqual(mockEvents)
-      // A implementação da rota não usa select, só where
-      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
-        where: { email: 'user@email.com' },
-      })
       expect(mockPrisma.healthEvent.findMany).toHaveBeenCalledWith({
         where: {
           userId: 'user-1',
@@ -91,35 +86,28 @@ describe('/api/repository', () => {
     })
 
     it('should return empty array when no events with files exist', async () => {
-      const mockUser = { id: 'user-1' }
       const mockEvents: any[] = []
-
-      mockPrisma.user.findUnique.mockResolvedValue(mockUser)
       mockPrisma.healthEvent.findMany.mockResolvedValue(mockEvents)
-
-      const response = await GET()
+      const req = { url: 'http://localhost/api/repository?userId=user-1' } as Request
+      const response = await GET(req)
       const data = await response.json()
-
       expect(response.status).toBe(200)
       expect(data).toEqual([])
     })
 
-    it('should return 500 when default user is not found', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(null)
-
-      const response = await GET()
+    it('should return 400 if userId is missing', async () => {
+      const req = { url: 'http://localhost/api/repository' } as Request
+      const response = await GET(req)
       const data = await response.json()
-
-      expect(response.status).toBe(500)
-      expect(data.error).toBe('Erro interno ao buscar dados do repositório.')
+      expect(response.status).toBe(400)
+      expect(data.error).toBe('userId é obrigatório')
     })
 
-    it('should return 500 on database error during user lookup', async () => {
-      mockPrisma.user.findUnique.mockRejectedValue(new Error('Database error'))
-
-      const response = await GET()
+    it('should return 500 on database error during events lookup', async () => {
+      mockPrisma.healthEvent.findMany.mockRejectedValue(new Error('Database error'))
+      const req = { url: 'http://localhost/api/repository?userId=user-1' } as Request
+      const response = await GET(req)
       const data = await response.json()
-
       expect(response.status).toBe(500)
       expect(data.error).toBe('Erro interno ao buscar dados do repositório.')
     })
@@ -140,7 +128,6 @@ describe('/api/repository', () => {
     })
 
     it('should filter out events with empty files array', async () => {
-      const mockUser = { id: 'user-1' }
       const mockEvents = [
         {
           id: 'event-1',
@@ -156,33 +143,17 @@ describe('/api/repository', () => {
             specialty: 'Cardiologia',
           },
         },
-        {
-          id: 'event-2',
-          title: 'Consulta Sem Arquivos',
-          date: '2025-01-20',
-          type: 'CONSULTA',
-          files: [], // Empty array should be filtered out
-          professional: {
-            id: 'prof-2',
-            name: 'Dra. Santos',
-            specialty: 'Clínica Geral',
-          },
-        },
       ]
-
-      mockPrisma.user.findUnique.mockResolvedValue(mockUser)
-      mockPrisma.healthEvent.findMany.mockResolvedValue([mockEvents[0]]) // Only return event with files
-
-      const response = await GET()
+      mockPrisma.healthEvent.findMany.mockResolvedValue([mockEvents[0]])
+      const req = { url: 'http://localhost/api/repository?userId=user-1' } as Request
+      const response = await GET(req)
       const data = await response.json()
-
       expect(response.status).toBe(200)
       expect(data).toHaveLength(1)
       expect(data[0].id).toBe('event-1')
     })
 
     it('should order events by date descending', async () => {
-      const mockUser = { id: 'user-1' }
       const mockEvents = [
         {
           id: 'event-1',
@@ -213,16 +184,13 @@ describe('/api/repository', () => {
           },
         },
       ]
-
-      mockPrisma.user.findUnique.mockResolvedValue(mockUser)
       mockPrisma.healthEvent.findMany.mockResolvedValue([
         mockEvents[1],
         mockEvents[0],
-      ]) // Simulate DB returning in correct order
-
-      const response = await GET()
+      ])
+      const req = { url: 'http://localhost/api/repository?userId=user-1' } as Request
+      const response = await GET(req)
       const data = await response.json()
-
       expect(response.status).toBe(200)
       expect(data).toHaveLength(2)
       expect(data[0].date).toBe('2025-01-20') // Most recent first

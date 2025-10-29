@@ -2,13 +2,24 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest'
 import App from '../../../src/components/App'
 // Mock do fetch global
+afterAll(() => {
+  vi.restoreAllMocks()
+})
 let mockFetch: any
 beforeAll(() => {
   mockFetch = vi.fn((...args) => {
-    if (typeof args[0] === 'string' && args[0].includes('specialties')) {
+    const url = typeof args[0] === 'string' ? args[0] : '';
+    if (url.includes('specialties')) {
       return Promise.resolve({
         ok: true,
         json: () => Promise.resolve(['Cardiologia', 'Dermatologia'])
+      })
+    }
+    if (url.includes('/api/users/by-email')) {
+      // Simula login bem-sucedido
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ id: 'user-1' })
       })
     }
     // fallback para outros endpoints
@@ -77,14 +88,20 @@ describe('App', () => {
     consoleSpy.mockRestore()
   })
 
-  it('shows dashboard after login', () => {
+
+
+  it('shows dashboard after login', async () => {
     render(<App />)
 
+    const emailInput = screen.getByPlaceholderText('usuário@email.com')
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } })
+    const passwordInput = screen.getByPlaceholderText('Senha')
+    fireEvent.change(passwordInput, { target: { value: 'password123' } })
     const loginButton = screen.getByText('Entrar')
     fireEvent.click(loginButton)
 
-    // After login, should show Dashboard component
-    // Since Dashboard is a separate component, we check that login screen is gone
+    // Aguarda o Dashboard aparecer (login bem-sucedido)
+    await screen.findByText('Minha Timeline')
     expect(screen.queryByText('Omni Saúde')).not.toBeInTheDocument()
   })
 
@@ -98,39 +115,52 @@ describe('App', () => {
     expect(screen.getByText('Omni Saúde')).toBeInTheDocument()
   })
 
-  it('handles logout from dashboard', () => {
+
+
+
+  it('handles logout from dashboard', async () => {
     render(<App />)
 
-    // First login
+    // Login
+    const emailInput = screen.getByPlaceholderText('usuário@email.com')
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } })
+    const passwordInput = screen.getByPlaceholderText('Senha')
+    fireEvent.change(passwordInput, { target: { value: 'password123' } })
     const loginButton = screen.getByText('Entrar')
     fireEvent.click(loginButton)
+    await screen.findByText('Minha Timeline')
 
-    // Should be in dashboard state
-    expect(screen.queryByText('Omni Saúde')).not.toBeInTheDocument()
+    // Simula clique no botão de sair do Sidebar
+    const sairButton = screen.getByText('Sair')
+    fireEvent.click(sairButton)
 
-    // Simulate logout by calling the logout handler
-    // Since we can't directly access the Dashboard's logout handler,
-    // we'll test the logout logic indirectly
+    // Deve voltar para tela de login
+    expect(screen.getByText('Omni Saúde')).toBeInTheDocument()
   })
 
-  it('clears form fields on logout', () => {
+
+
+
+
+
+  it('clears form fields on logout', async () => {
     render(<App />)
 
     const emailInput = screen.getByPlaceholderText('usuário@email.com')
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } })
-
     const passwordInput = screen.getByPlaceholderText('Senha')
     fireEvent.change(passwordInput, { target: { value: 'password123' } })
-
-    // Login
     const loginButton = screen.getByText('Entrar')
     fireEvent.click(loginButton)
+    await screen.findByText('Minha Timeline')
 
-    // Should be logged in
-    expect(screen.queryByText('Omni Saúde')).not.toBeInTheDocument()
+    // Simula logout
+    const sairButton = screen.getByText('Sair')
+    fireEvent.click(sairButton)
 
-    // Note: In a real scenario, logout would be triggered from Dashboard
-    // For this test, we assume logout resets the state
+    // Deve limpar os campos
+    expect(screen.getByPlaceholderText('usuário@email.com')).toHaveValue('')
+    expect(screen.getByPlaceholderText('Senha')).toHaveValue('')
   })
 
   it('renders with correct styling', () => {

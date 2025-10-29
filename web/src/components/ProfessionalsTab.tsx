@@ -13,15 +13,14 @@ interface Professional {
   contact?: string
 }
 
-interface ProfessionalsTabProps {
-  professionals: Professional[]
-  setProfessionals: React.Dispatch<React.SetStateAction<Professional[]>>
+export interface ProfessionalsTabProps {
+  professionals: Professional[];
+  setProfessionals: React.Dispatch<React.SetStateAction<Professional[]>>;
+  userId: string;
 }
 
-export function ProfessionalsTab({
-  professionals,
-  setProfessionals,
-}: ProfessionalsTabProps) {
+export function ProfessionalsTab(props: ProfessionalsTabProps) {
+  const { professionals, setProfessionals, userId } = props;
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [editingProfessional, setEditingProfessional] =
@@ -55,7 +54,7 @@ export function ProfessionalsTab({
     contact: string
   }) => {
     try {
-      const response = await fetch('/api/professionals', {
+      const response = await fetch(`/api/professionals?userId=${encodeURIComponent(userId)}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -81,7 +80,7 @@ export function ProfessionalsTab({
   const handleDelete = async (id: string) => {
     if (window.confirm('Tem certeza que deseja excluir este profissional?')) {
       try {
-        const response = await fetch('/api/professionals', {
+        const response = await fetch(`/api/professionals?userId=${encodeURIComponent(userId)}`, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id }),
@@ -101,10 +100,10 @@ export function ProfessionalsTab({
     contact: string
   }) => {
     try {
-      const response = await fetch('/api/professionals', {
+      const response = await fetch(`/api/professionals?userId=${encodeURIComponent(userId)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(professional),
+        body: JSON.stringify({ ...professional, userId }),
       })
       if (!response.ok) throw new Error('Erro ao adicionar profissional')
       const savedProfessional = await response.json()

@@ -1,16 +1,14 @@
+
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-// Função para obter o ID do usuário padrão (simulando uma sessão)
-async function getDefaultUserId() {
-  const user = await prisma.user.findUnique({ where: { email: 'user@email.com' } });
-  if (!user) throw new Error('Usuário padrão não encontrado.');
-  return user.id;
-}
-
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const userId = await getDefaultUserId();
+    const url = new URL(request.url);
+    const userId = url.searchParams.get('userId');
+    if (!userId) {
+      return NextResponse.json({ error: 'userId é obrigatório' }, { status: 400 });
+    }
 
     // Busca apenas eventos que tenham arquivos (files array não é vazio)
     const eventsWithFiles = await prisma.healthEvent.findMany({

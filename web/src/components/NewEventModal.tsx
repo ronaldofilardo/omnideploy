@@ -27,6 +27,7 @@ interface NewEventModalProps {
   onOpenChange: (open: boolean) => void
   professionals: Professional[]
   setProfessionals: React.Dispatch<React.SetStateAction<Professional[]>>
+  userId: string
 }
 
 export default function NewEventModal({
@@ -34,6 +35,7 @@ export default function NewEventModal({
   onOpenChange,
   professionals,
   setProfessionals,
+  userId,
 }: NewEventModalProps) {
   const [isAddProfessionalOpen, setIsAddProfessionalOpen] = useState(false)
 
@@ -48,6 +50,7 @@ export default function NewEventModal({
     refreshEvents,
   } = useEventForm({
     professionals,
+    userId,
     onFormSubmitSuccess: () => {
       onOpenChange(false)
     },

@@ -34,8 +34,8 @@ async function GET_SPECIALTIES() {
 
 export async function PUT(req: Request) {
   try {
-    const userId = await getDefaultUserId()
     const body = await req.json()
+    const userId = body.userId || await getDefaultUserId()
     const { id, name, specialty, address, contact } = body
     if (!id || !name || !specialty) {
       return NextResponse.json(
@@ -66,7 +66,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const userId = await getDefaultUserId()
+    const userId = url.searchParams.get('userId') || await getDefaultUserId()
     const professionals = await prisma.professional.findMany({
       where: { userId },
     })
@@ -79,8 +79,8 @@ export async function GET(request: Request) {
 
 export async function POST(req: Request) {
   try {
-    const userId = await getDefaultUserId()
     const body = await req.json()
+    const userId = body.userId || await getDefaultUserId()
     let { name, specialty, address, contact } = body
     if (!name) {
       return NextResponse.json(
@@ -105,8 +105,8 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
-    const userId = await getDefaultUserId()
     const body = await req.json()
+    const userId = body.userId || await getDefaultUserId()
     const { id } = body
     if (!id) {
       return NextResponse.json(

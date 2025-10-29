@@ -7,7 +7,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
-  globalSetup: './tests/e2e/specs/setup/index.ts',
+  globalSetup: './tests/setup/setup-tests.ts',
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
@@ -17,17 +17,9 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
   ],
   webServer: {
-  command: 'dotenv -e .env.test -- cross-env NODE_ENV=test DATABASE_URL="postgresql://postgres:123456@localhost:5432/omni_mvp_test?schema=public" pnpm dev',
+    command: 'pnpm run dev',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     env: {

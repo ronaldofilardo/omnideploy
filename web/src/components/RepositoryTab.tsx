@@ -106,7 +106,11 @@ function FileSlot({
   )
 }
 
-export function RepositoryTab() {
+interface RepositoryTabProps {
+  userId: string
+}
+
+export function RepositoryTab({ userId }: RepositoryTabProps) {
   const [events, setEvents] = useState<EventWithFiles[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -115,7 +119,7 @@ export function RepositoryTab() {
     async function fetchData() {
       try {
         setLoading(true)
-        const response = await fetch('/api/repository')
+        const response = await fetch(`/api/repository?userId=${encodeURIComponent(userId)}`)
         if (!response.ok) throw new Error('Falha ao buscar dados')
         const data = await response.json()
         setEvents(data)
@@ -126,7 +130,7 @@ export function RepositoryTab() {
       }
     }
     fetchData()
-  }, [])
+  }, [userId])
 
   const filteredEvents = useMemo(() => {
     if (!searchTerm.trim()) return events

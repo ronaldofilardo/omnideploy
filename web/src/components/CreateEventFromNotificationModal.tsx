@@ -16,9 +16,10 @@ interface CreateEventFromNotificationModalProps {
     };
   };
   professionalId: string;
+  userId: string;
 }
 
-export default function CreateEventFromNotificationModal({ open, onClose, onSuccess, notification, professionalId }: CreateEventFromNotificationModalProps) {
+export default function CreateEventFromNotificationModal({ open, onClose, onSuccess, notification, professionalId, userId }: CreateEventFromNotificationModalProps) {
   const [title, setTitle] = useState('Laudo: ' + notification.payload.report.fileName);
   const [date, setDate] = useState(notification.payload.examDate);
   const [startTime, setStartTime] = useState('09:00');
@@ -32,7 +33,7 @@ export default function CreateEventFromNotificationModal({ open, onClose, onSucc
     try {
       // 1. Sempre criar um novo profissional
       const doctorName = notification.payload.doctorName;
-      const createRes = await fetch('/api/professionals', {
+  const createRes = await fetch('/api/professionals', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: doctorName, specialty: 'A ser definido' })
@@ -42,7 +43,7 @@ export default function CreateEventFromNotificationModal({ open, onClose, onSucc
       if (!professionalId) throw new Error('Não foi possível criar o profissional.');
 
       // 2. Criar evento com o id do profissional recém-criado
-      const res = await fetch('/api/events', {
+      const res = await fetch(`/api/events?userId=${encodeURIComponent(userId)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

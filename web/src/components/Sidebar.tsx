@@ -6,14 +6,16 @@ interface SidebarProps {
   activeMenu: string
   onMenuClick: (menu: string) => void
   onClose?: () => void
+  userId: string
 }
 
-export default function Sidebar({ activeMenu, onMenuClick, onClose }: SidebarProps) {
+export default function Sidebar({ activeMenu, onMenuClick, onClose, userId }: SidebarProps) {
   const menuItems = [
     { id: 'timeline', label: 'Timeline', icon: Clock },
     { id: 'professionals', label: 'Profissionais', icon: Users },
     { id: 'repositorio', label: 'Repositório', icon: FileText },
     { id: 'calendario', label: 'Calendário', icon: Calendar },
+    { id: 'dadospessoais', label: 'Dados Pessoais', icon: FileText },
   ];
 
   // Estado para contador de notificações
@@ -21,7 +23,8 @@ export default function Sidebar({ activeMenu, onMenuClick, onClose }: SidebarPro
 
   useEffect(() => {
     const fetchNotifications = () => {
-      fetch('/api/notifications')
+      if (!userId) return;
+      fetch(`/api/notifications?userId=${encodeURIComponent(userId)}`)
         .then(res => res.json())
         .then(data => {
           const arr = Array.isArray(data) ? data : data.notifications || [];
@@ -31,7 +34,7 @@ export default function Sidebar({ activeMenu, onMenuClick, onClose }: SidebarPro
     fetchNotifications();
     const interval = setInterval(fetchNotifications, 2000);
     return () => clearInterval(interval);
-  }, []);
+  }, [userId]);
 
   return (
     <div className="w-[280px] h-screen bg-white border-r border-[#E5E7EB] flex flex-col relative">

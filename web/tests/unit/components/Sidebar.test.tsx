@@ -11,9 +11,9 @@ describe('Sidebar', () => {
     vi.clearAllMocks()
   })
 
-  const renderComponent = (activeMenu = 'timeline') => {
+  const renderComponent = (activeMenu = 'timeline', userId = 'user-1') => {
     return render(
-      <Sidebar activeMenu={activeMenu} onMenuClick={mockOnMenuClick} />
+      <Sidebar activeMenu={activeMenu} onMenuClick={mockOnMenuClick} userId={userId} />
     )
   }
 
@@ -101,9 +101,9 @@ describe('Sidebar', () => {
   it('renders icons for each menu item', () => {
     renderComponent()
 
-    // Agora temos: 4 menu items + notificações + logout = 6 botões
+    // Agora temos: 5 menu items + notificações + logout = 7 botões
     const buttons = screen.getAllByRole('button')
-    expect(buttons).toHaveLength(6)
+    expect(buttons).toHaveLength(7)
 
     // Cada botão deve conter um ícone (elemento svg)
     buttons.forEach((button) => {
@@ -136,15 +136,16 @@ describe('Sidebar', () => {
   })
 
   it('renders menu items in correct order', () => {
-  renderComponent()
+    renderComponent()
 
-  const menuItems = screen.getAllByRole('button')
-  expect(menuItems[0]).toHaveTextContent('Timeline')
-  expect(menuItems[1]).toHaveTextContent('Profissionais')
-  expect(menuItems[2]).toHaveTextContent('Repositório')
-  expect(menuItems[3]).toHaveTextContent('Calendário')
-  expect(menuItems[4]).toHaveTextContent('Notificações')
-  expect(menuItems[5]).toHaveTextContent('Sair')
+    const menuItems = screen.getAllByRole('button')
+    expect(menuItems[0]).toHaveTextContent('Timeline')
+    expect(menuItems[1]).toHaveTextContent('Profissionais')
+    expect(menuItems[2]).toHaveTextContent('Repositório')
+    expect(menuItems[3]).toHaveTextContent('Calendário')
+    expect(menuItems[4]).toHaveTextContent('Dados Pessoais')
+    expect(menuItems[5]).toHaveTextContent('Notificações')
+    expect(menuItems[6]).toHaveTextContent('Sair')
   })
 
   it('handles different active menu states', () => {
@@ -154,7 +155,7 @@ describe('Sidebar', () => {
       'bg-[#10B981]'
     )
 
-    rerender(<Sidebar activeMenu="repositorio" onMenuClick={mockOnMenuClick} />)
+  rerender(<Sidebar activeMenu="repositorio" onMenuClick={mockOnMenuClick} userId="user-1" />)
 
     expect(screen.getByText('Timeline').closest('button')).not.toHaveClass(
       'bg-[#10B981]'

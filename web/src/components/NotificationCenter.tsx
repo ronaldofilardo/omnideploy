@@ -22,10 +22,11 @@ interface Professional {
 }
 
 interface NotificationCenterProps {
+  userId: string
   onProfessionalCreated?: () => void
 }
 
-export default function NotificationCenter({ onProfessionalCreated }: NotificationCenterProps) {
+export default function NotificationCenter({ userId, onProfessionalCreated }: NotificationCenterProps) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +46,8 @@ export default function NotificationCenter({ onProfessionalCreated }: Notificati
 
   const fetchNotifications = () => {
     setLoading(true);
-    fetch('/api/notifications')
+    if (!userId) return;
+    fetch(`/api/notifications?userId=${encodeURIComponent(userId)}`)
       .then((res) => res.json())
       .then((data) => {
         setNotifications(Array.isArray(data) ? data : data.notifications || []);
@@ -59,7 +61,7 @@ export default function NotificationCenter({ onProfessionalCreated }: Notificati
 
   useEffect(() => {
     fetchNotifications();
-  }, []);
+  }, [userId]);
 
   if (loading) return <div className="flex items-center justify-center h-full text-gray-500 text-lg">Carregando notificações...</div>;
   if (error) return <div className="flex items-center justify-center h-full text-red-500 text-lg">{error}</div>;
@@ -123,6 +125,7 @@ export default function NotificationCenter({ onProfessionalCreated }: Notificati
         open={associateModal.open}
         onClose={() => setAssociateModal({ open: false, notification: null })}
         onSuccess={fetchNotifications}
+        userId={userId}
       />
       {/* Modal de criação */}
       {createModal.notification && (
@@ -132,6 +135,7 @@ export default function NotificationCenter({ onProfessionalCreated }: Notificati
           onSuccess={handleSuccess}
           notification={createModal.notification}
           professionalId={professionalId}
+          userId={userId}
         />
       )}
     </div>

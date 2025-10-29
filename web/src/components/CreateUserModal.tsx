@@ -19,9 +19,11 @@ import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 interface CreateUserModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  // Callback opcional após cadastro bem-sucedido
+  onRegistered?: (user: { email: string; name?: string }) => void
 }
 
-export function CreateUserModal({ open, onOpenChange }: CreateUserModalProps) {
+export function CreateUserModal({ open, onOpenChange, onRegistered }: CreateUserModalProps) {
   const [fullName, setFullName] = useState('')
   const [cpf, setCpf] = useState('')
   const [phone, setPhone] = useState('')
@@ -29,6 +31,8 @@ export function CreateUserModal({ open, onOpenChange }: CreateUserModalProps) {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmClose, setShowConfirmClose] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   // Format CPF: 000.000.000-00
   const formatCPF = (value: string) => {
@@ -61,16 +65,37 @@ export function CreateUserModal({ open, onOpenChange }: CreateUserModalProps) {
     setPhone(formatPhone(e.target.value))
   }
 
-  const handleSubmit = () => {
-    // Handle user creation logic
-    console.log('Creating user:', {
-      fullName,
-      cpf,
-      phone,
-      email,
-      password,
-    })
-    onOpenChange(false)
+  const handleSubmit = async () => {
+    if (!email || !password) {
+      setError('E-mail e senha são obrigatórios')
+      return
+    }
+    setSubmitting(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          email, 
+          password, 
+          name: fullName,
+          cpf,
+          telefone: phone
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        throw new Error(data?.error || 'Falha ao criar usuário')
+      }
+      // Sucesso: fechar modal e notificar parent
+      onRegistered?.({ email, name: fullName })
+      onOpenChange(false)
+    } catch (e: any) {
+      setError(e?.message || 'Erro ao criar usuário')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -168,12 +193,20 @@ export function CreateUserModal({ open, onOpenChange }: CreateUserModalProps) {
               </button>
             </div>
 
+            {/* Mensagem de erro */}
+            {error && (
+              <p className="text-sm text-red-600" role="alert">
+                {error}
+              </p>
+            )}
+
             {/* Botão Criar Usuário */}
             <Button
               onClick={handleSubmit}
-              className="w-full h-12 bg-[#10B981] hover:bg-[#059669] text-white rounded-md mt-2 shadow-sm"
+              disabled={submitting}
+              className="w-full h-12 bg-[#10B981] hover:bg-[#059669] text-white rounded-md mt-2 shadow-sm disabled:opacity-60"
             >
-              Criar Usuário
+              {submitting ? 'Criando...' : 'Criar Usuário'}
             </Button>
           </div>
         </DialogContent>

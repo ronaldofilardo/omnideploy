@@ -9,10 +9,12 @@ import { RepositoryTab } from './RepositoryTab'
 import { CalendarTab } from './CalendarTab'
 import { Button } from './ui/button'
 import NotificationCenter from './NotificationCenter'
+import PersonalDataTab from './PersonalDataTab'
 
 interface DashboardProps {
   onLogout: () => void
-}
+    userId: string
+  }
 
 // Definir tipo Professional
 interface Professional {
@@ -38,7 +40,7 @@ interface Event {
   status?: 'past' | 'current' | 'future'
 }
 
-export function Dashboard({ onLogout }: DashboardProps) {
+export function Dashboard({ onLogout, userId }: DashboardProps) {
   const [activeMenu, setActiveMenu] = useState('timeline')
   const [isNewEventModalOpen, setIsNewEventModalOpen] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -60,18 +62,20 @@ export function Dashboard({ onLogout }: DashboardProps) {
 
   // Buscar profissionais do backend ao montar
   useEffect(() => {
-    fetch('/api/professionals')
+    if (!userId) return
+    fetch(`/api/professionals?userId=${encodeURIComponent(userId)}`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) setProfessionals(data)
       })
-  }, [])
+  }, [userId])
 
   // Polling com retry exponencial otimizado
   const fetchEventsWithRetry = useCallback(async (retryCount = 0) => {
+    if (!userId) return
     try {
       console.log('[Dashboard] Fetching events...')
-      const response = await fetch('/api/events')
+      const response = await fetch(`/api/events?userId=${encodeURIComponent(userId)}`)
       if (!response.ok) throw new Error('Failed to fetch events')
       const data = await response.json()
       console.log('[Dashboard] Events fetched:', data)
@@ -89,13 +93,13 @@ export function Dashboard({ onLogout }: DashboardProps) {
         setTimeout(() => fetchEventsWithRetry(retryCount + 1), delay)
       }
     }
-  }, [])
+  }, [userId])
 
   // Buscar eventos do backend ao montar
   useEffect(() => {
     fetchEventsWithRetry(0)
     setPage(1)
-  }, [fetchEventsWithRetry])
+  }, [fetchEventsWithRetry, userId])
 
   // Polling automático para atualizar eventos a cada 2 segundos
   useEffect(() => {
@@ -144,12 +148,13 @@ export function Dashboard({ onLogout }: DashboardProps) {
 
   // Função para atualizar profissionais
   const refreshProfessionals = useCallback(() => {
-    fetch('/api/professionals')
+    if (!userId) return
+    fetch(`/api/professionals?userId=${encodeURIComponent(userId)}`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) setProfessionals(data)
       })
-  }, [])
+  }, [userId])
 
   return (
   <div className="flex bg-linear-to-b from-[#F8FAFC] to-white">
@@ -182,6 +187,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
           activeMenu={activeMenu}
           onMenuClick={handleMenuClick}
           onClose={() => setIsSidebarOpen(false)}
+          userId={userId}
         />
       </div>
 
@@ -250,11 +256,12 @@ export function Dashboard({ onLogout }: DashboardProps) {
         </div>
       )}
       {/* Professionals Tab */}
-      {activeMenu === 'repositorio' && <RepositoryTab />}
+      {activeMenu === 'repositorio' && <RepositoryTab userId={userId} />}
       {activeMenu === 'professionals' && (
         <ProfessionalsTab
           professionals={professionals}
           setProfessionals={setProfessionals}
+          userId={userId}
         />
       )}
       {/* Calendar Tab */}
@@ -268,7 +275,13 @@ export function Dashboard({ onLogout }: DashboardProps) {
       {/* Notification Center */}
       {activeMenu === 'notificacoes' && (
         <div className="flex-1 w-full md:w-[1160px] relative ml-0 md:ml-0">
-          <NotificationCenter onProfessionalCreated={refreshProfessionals} />
+          <NotificationCenter userId={userId} onProfessionalCreated={refreshProfessionals} />
+        </div>
+      )}
+      {/* Personal Data Tab */}
+      {activeMenu === 'dadospessoais' && (
+        <div className="flex-1 w-full md:w-[1160px] relative ml-0 md:ml-0">
+          <PersonalDataTab userId={userId} />
         </div>
       )}
       {/* New Event Modal */}
@@ -280,6 +293,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
         }}
         professionals={professionals}
         setProfessionals={setProfessionals}
+        userId={userId}
       />
       {/* Renderizar eventos reais do banco */}
     </div>

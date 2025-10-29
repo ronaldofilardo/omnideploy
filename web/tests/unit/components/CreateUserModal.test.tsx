@@ -99,8 +99,12 @@ describe('CreateUserModal', () => {
   expect(input).toHaveAttribute('type', 'password')
   })
 
-  it('handles form submission', () => {
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+  it('handles form submission', async () => {
+    // Mock global fetch para simular cadastro bem-sucedido
+    global.fetch = vi.fn(() => Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve({ id: 'user-1' })
+    })) as any;
 
     renderModal(true)
 
@@ -122,16 +126,9 @@ describe('CreateUserModal', () => {
     const submitButton = screen.getByText('Criar Usuário')
     fireEvent.click(submitButton)
 
-    expect(consoleSpy).toHaveBeenCalledWith('Creating user:', {
-      fullName: 'João Silva',
-      cpf: '123.456.789-01',
-      phone: '(11) 98765-4321',
-      email: 'joao@email.com',
-      password: 'senha123',
-    })
+    // Aguarda o fechamento do modal
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(mockOnOpenChange).toHaveBeenCalledWith(false)
-
-    consoleSpy.mockRestore()
   })
 
   it('shows confirmation dialog when closing with data', () => {
@@ -198,22 +195,14 @@ describe('CreateUserModal', () => {
     expect(input).toHaveAttribute('maxLength', '15') // (00) 00000-0000
   })
 
-  it('handles empty form submission', () => {
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
-
+  it('handles empty form submission', async () => {
     renderModal(true)
 
     const submitButton = screen.getByText('Criar Usuário')
     fireEvent.click(submitButton)
 
-    expect(consoleSpy).toHaveBeenCalledWith('Creating user:', {
-      fullName: '',
-      cpf: '',
-      phone: '',
-      email: '',
-      password: '',
-    })
-
-    consoleSpy.mockRestore()
+    // Aguarda mensagem de erro
+    await screen.findByRole('alert')
+    expect(screen.getByRole('alert')).toHaveTextContent('E-mail e senha são obrigatórios')
   })
 })

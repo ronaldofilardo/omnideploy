@@ -95,8 +95,9 @@ describe('Dashboard', () => {
     )
   })
 
+  const mockUserId = 'user-1'
   const renderDashboard = () => {
-    return render(<Dashboard onLogout={mockOnLogout} />)
+    return render(<Dashboard onLogout={mockOnLogout} userId={mockUserId} />)
   }
 
   it('renders dashboard with timeline by default', async () => {
@@ -106,8 +107,8 @@ describe('Dashboard', () => {
     expect(screen.getByText('Novo Evento')).toBeInTheDocument()
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith('/api/professionals')
-      expect(global.fetch).toHaveBeenCalledWith('/api/events')
+      expect(global.fetch).toHaveBeenCalledWith(`/api/professionals?userId=${mockUserId}`)
+      expect(global.fetch).toHaveBeenCalledWith(`/api/events?userId=${mockUserId}`)
     })
   })
 
@@ -115,8 +116,8 @@ describe('Dashboard', () => {
     renderDashboard()
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith('/api/professionals')
-      expect(global.fetch).toHaveBeenCalledWith('/api/events')
+      expect(global.fetch).toHaveBeenCalledWith(`/api/professionals?userId=${mockUserId}`)
+      expect(global.fetch).toHaveBeenCalledWith(`/api/events?userId=${mockUserId}`)
     })
   })
 
@@ -133,17 +134,17 @@ describe('Dashboard', () => {
   })
 
   it('calls onLogout when logout menu is clicked', () => {
-  const mockOnLogout = vi.fn()
-  render(<Dashboard onLogout={mockOnLogout} />)
+    const mockOnLogout = vi.fn()
+    render(<Dashboard onLogout={mockOnLogout} userId={mockUserId} />)
 
-  // Sidebar real: buscar pelo data-testid
-  const sidebar = screen.getByTestId('sidebar')
-  expect(sidebar).toBeInTheDocument()
+    // Sidebar real: buscar pelo data-testid
+    const sidebar = screen.getByTestId('sidebar')
+    expect(sidebar).toBeInTheDocument()
 
-  // Clicar no botão "Sair"
-  const logoutButton = screen.getByText('Sair')
-  fireEvent.click(logoutButton)
-  expect(mockOnLogout).toHaveBeenCalled()
+    // Clicar no botão "Sair"
+    const logoutButton = screen.getByText('Sair')
+    fireEvent.click(logoutButton)
+    expect(mockOnLogout).toHaveBeenCalled()
   })
 
 
@@ -160,7 +161,7 @@ describe('Dashboard', () => {
       text: async () => 'Network error',
     } as any)
 
-    render(<Dashboard onLogout={vi.fn()} />)
+  render(<Dashboard onLogout={vi.fn()} userId={mockUserId} />)
 
     // Aguarda a chamada do console.error
     await waitFor(() => {
@@ -181,7 +182,7 @@ describe('Dashboard', () => {
     // Simular fechamento do modal (isso deveria chamar refreshEvents)
     // Como não temos acesso direto ao estado do modal, verificamos se fetch foi chamado novamente
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith('/api/events')
+      expect(global.fetch).toHaveBeenCalledWith(`/api/events?userId=${mockUserId}`)
     })
   })
 

@@ -157,38 +157,32 @@ import path from 'path'
 
 const DEFAULT_USER_EMAIL = 'user@email.com'
 
-async function getDefaultUserId() {
+
+// Função utilitária para obter userId do query param
+function getUserIdFromUrl(req: Request): string | null {
   try {
-    const user = await prisma.user.findUnique({
-      where: { email: DEFAULT_USER_EMAIL },
-      select: { id: true },
-    })
-    if (!user) {
-      console.error(
-        `[API Events] Usuário padrão não encontrado: ${DEFAULT_USER_EMAIL}`
-      )
-      throw new Error(`Usuário padrão não encontrado: ${DEFAULT_USER_EMAIL}`)
-    }
-    console.log(`[API Events] Usuário encontrado: ${user.id}`)
-    return user.id
-  } catch (error) {
-    console.error(`[API Events] Erro ao buscar usuário padrão:`, error)
-    throw error
+    const url = new URL(req.url)
+    const userId = url.searchParams.get('userId')
+    return userId || null
+  } catch {
+    return null
   }
 }
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const userId = await getDefaultUserId()
+    const userId = getUserIdFromUrl(req)
+    if (!userId) {
+      return NextResponse.json({ error: 'userId é obrigatório' }, { status: 400 })
+    }
     console.log(`[API Events] Buscando eventos para usuário: ${userId}`)
     const events = await prisma.healthEvent.findMany({
       where: { userId },
     })
     console.log(`[API Events] Encontrados ${events.length} eventos`)
-
     return NextResponse.json(events, {
       headers: {
-        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300', // Cache por 1 min, stale por 5 min
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
       },
     })
   } catch (error) {
@@ -223,7 +217,10 @@ export async function POST(req: Request) {
   let body: EventBody | undefined = undefined
   try {
     body = await req.json()
-    const userId = await getDefaultUserId()
+    const userId = getUserIdFromUrl(req)
+    if (!userId) {
+      return NextResponse.json({ error: 'userId é obrigatório' }, { status: 400 })
+    }
     const {
       title,
       description,

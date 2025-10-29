@@ -31,7 +31,7 @@ describe('/api/events', () => {
   })
 
   describe('GET', () => {
-    it('should return events for default user', async () => {
+    it('should return events for userId in query', async () => {
       const mockDate = '2024-01-01'
       const mockEvents = [
         {
@@ -42,14 +42,14 @@ describe('/api/events', () => {
         },
       ]
 
-      mockPrisma.user.findUnique.mockResolvedValue({ id: 'user-1' })
       mockPrisma.healthEvent.findMany.mockResolvedValue(mockEvents)
 
-      const response = await GET()
+      // Simula Request com userId na query
+      const req = { url: 'http://localhost/api/events?userId=user-1' } as Request
+      const response = await GET(req)
       const data = await response.json()
 
       expect(response.status).toBe(200)
-      // A API retorna datas como strings ISO
       expect(data).toEqual([
         {
           id: '1',
@@ -58,21 +58,25 @@ describe('/api/events', () => {
           type: 'consulta',
         },
       ])
-      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
-        where: { email: 'user@email.com' },
-        select: { id: true },
-      })
       expect(mockPrisma.healthEvent.findMany).toHaveBeenCalledWith({
         where: { userId: 'user-1' },
       })
     })
 
-    it('should return 500 on error', async () => {
-      mockPrisma.user.findUnique.mockRejectedValue(new Error('Database error'))
-
-      const response = await GET()
+    it('should return 400 if userId is missing', async () => {
+      // Simula Request sem userId
+      const req = { url: 'http://localhost/api/events' } as Request
+      const response = await GET(req)
       const data = await response.json()
+      expect(response.status).toBe(400)
+      expect(data.error).toBe('userId é obrigatório')
+    })
 
+    it('should return 500 on error', async () => {
+      mockPrisma.healthEvent.findMany.mockRejectedValue(new Error('Database error'))
+      const req = { url: 'http://localhost/api/events?userId=user-1' } as Request
+      const response = await GET(req)
+      const data = await response.json()
       expect(response.status).toBe(500)
       expect(data.error).toBe('Erro interno do servidor ao buscar eventos')
     })
@@ -94,10 +98,10 @@ describe('/api/events', () => {
         },
       ]
 
-      mockPrisma.user.findUnique.mockResolvedValue({ id: 'user-1' })
       mockPrisma.healthEvent.findMany.mockResolvedValue(mockEvents)
 
-      const response = await GET()
+      const req = { url: 'http://localhost/api/events?userId=user-1' } as Request
+      const response = await GET(req)
       const data = await response.json()
 
       expect(response.status).toBe(200)
@@ -117,6 +121,7 @@ describe('/api/events', () => {
   })
 
   describe('POST', () => {
+
     it('should create a new event', async () => {
       const mockDate = '2024-01-01'
       const mockEvent = {
@@ -142,11 +147,12 @@ describe('/api/events', () => {
         files: [],
       }
 
-  mockPrisma.user.findUnique.mockResolvedValue({ id: 'user-1' })
-  mockPrisma.healthEvent.findMany.mockResolvedValue([]) // Sem sobreposição
-  mockPrisma.healthEvent.create.mockResolvedValue(mockEvent)
+      mockPrisma.healthEvent.findMany.mockResolvedValue([]) // Sem sobreposição
+      mockPrisma.healthEvent.create.mockResolvedValue(mockEvent)
 
+      // Simula Request com userId na query
       const mockRequest = {
+        url: 'http://localhost/api/events?userId=user-1',
         json: vi.fn().mockResolvedValue(requestBody),
       } as unknown as Request
 
@@ -154,7 +160,6 @@ describe('/api/events', () => {
       const data = await response.json()
 
       expect(response.status).toBe(201)
-      // A API retorna datas como strings ISO
       expect(data).toEqual({
         ...mockEvent,
         date: mockDate,
@@ -174,21 +179,19 @@ describe('/api/events', () => {
       })
     })
 
-    it('should return 400 for missing required fields', async () => {
+    it('should return 400 if userId is missing', async () => {
       const requestBody = {
         title: 'Consulta Médica',
         // missing required fields
       }
-
       const mockRequest = {
+        url: 'http://localhost/api/events',
         json: vi.fn().mockResolvedValue(requestBody),
       } as unknown as Request
-
       const response = await POST(mockRequest)
       const data = await response.json()
-
       expect(response.status).toBe(400)
-      expect(data.error).toBe('Campos obrigatórios ausentes')
+      expect(data.error).toBe('userId é obrigatório')
     })
 
     it('should convert local date to UTC when creating event', async () => {
@@ -218,11 +221,11 @@ describe('/api/events', () => {
         files: [],
       }
 
-  mockPrisma.user.findUnique.mockResolvedValue({ id: 'user-1' })
-  mockPrisma.healthEvent.findMany.mockResolvedValue([]) // Sem sobreposição
-  mockPrisma.healthEvent.create.mockResolvedValue(mockEvent)
+      mockPrisma.healthEvent.findMany.mockResolvedValue([]) // Sem sobreposição
+      mockPrisma.healthEvent.create.mockResolvedValue(mockEvent)
 
       const mockRequest = {
+        url: 'http://localhost/api/events?userId=user-1',
         json: vi.fn().mockResolvedValue(requestBody),
       } as unknown as Request
 
@@ -483,7 +486,7 @@ describe('/api/events', () => {
       })
     })
 
-    it('should return 400 for overlapping events when creating', async () => {
+  it('should return 400 for overlapping events when creating', async () => {
       // Primeiro, criar um evento existente
       const existingEvent = {
         id: '1',
@@ -528,6 +531,7 @@ describe('/api/events', () => {
       }
 
       const mockRequest = {
+        url: 'http://localhost/api/events?userId=user-1',
         json: vi.fn().mockResolvedValue(requestBody),
       } as unknown as Request
 
@@ -538,7 +542,7 @@ describe('/api/events', () => {
       expect(data.error).toContain('sobreposição')
     })
 
-    it('should return 400 for invalid date format', async () => {
+  it('should return 400 for invalid date format', async () => {
       const requestBody = {
         title: 'Consulta Médica',
         description: 'Consulta de rotina',
@@ -551,6 +555,7 @@ describe('/api/events', () => {
       }
 
       const mockRequest = {
+        url: 'http://localhost/api/events?userId=user-1',
         json: vi.fn().mockResolvedValue(requestBody),
       } as unknown as Request
 
@@ -561,7 +566,7 @@ describe('/api/events', () => {
       expect(data.error).toContain('Formato de data inválido')
     })
 
-    it('should return 400 for end time before start time', async () => {
+  it('should return 400 for end time before start time', async () => {
       const requestBody = {
         title: 'Consulta Médica',
         description: 'Consulta de rotina',
@@ -574,6 +579,7 @@ describe('/api/events', () => {
       }
 
       const mockRequest = {
+        url: 'http://localhost/api/events?userId=user-1',
         json: vi.fn().mockResolvedValue(requestBody),
       } as unknown as Request
 

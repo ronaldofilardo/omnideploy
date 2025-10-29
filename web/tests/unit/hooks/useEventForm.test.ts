@@ -31,9 +31,11 @@ describe('useEventForm', () => {
 
   const mockOnFormSubmitSuccess = vi.fn()
 
+  const mockUserId = 'user-1'
   const defaultProps = {
     professionals: mockProfessionals,
     onFormSubmitSuccess: mockOnFormSubmitSuccess,
+    userId: mockUserId,
   }
 
   beforeEach(() => {
@@ -210,7 +212,7 @@ describe('useEventForm', () => {
         await result.current.handleSubmit(mockEvent as any)
       })
 
-      expect(global.fetch).toHaveBeenCalledWith('/api/events', {
+  expect(global.fetch).toHaveBeenCalledWith(`/api/events?userId=${mockUserId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -450,7 +452,7 @@ describe('useEventForm', () => {
       })
 
       // Verificar se fetch foi chamado novamente
-      expect(global.fetch).toHaveBeenCalledWith('/api/events')
+  expect(global.fetch).toHaveBeenCalledWith(`/api/events?userId=${mockUserId}`)
     })
   })
 })
