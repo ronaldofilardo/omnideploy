@@ -1,13 +1,16 @@
-import { NextResponse } from 'next/server';
+
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(request: Request, context: { params: { userId?: string } }) {
-  const params = await context.params;
-  const userId = params.userId;
-  console.log('[API][userId] Recebido:', userId);
+// Define explicitamente a configuração da rota
+export const dynamic = 'force-dynamic';
+
+export async function GET(request: NextRequest, { params }: { params: Promise<{ userId: string }> }) {
+  const { userId } = await params;
   if (!userId) {
     return NextResponse.json({ error: 'userId é obrigatório' }, { status: 400 });
   }
+  console.log('[API][userId] Recebido:', userId);
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
