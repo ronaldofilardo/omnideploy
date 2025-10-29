@@ -16,6 +16,27 @@ const INITIAL_STATE = {
 // Vitest globals
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 
+// Helper para criar um Response mock
+function createResponse(data: any, requestUrl: string, ok = true, status = 200) {
+  return Promise.resolve({
+    ok,
+    status,
+    statusText: ok ? 'OK' : 'Error',
+    headers: new Headers(),
+    redirected: false,
+    type: 'basic' as ResponseType,
+    url: requestUrl,
+    clone() { return this },
+    body: null,
+    bodyUsed: false,
+    arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+    blob: () => Promise.resolve(new Blob()),
+    formData: () => Promise.resolve(new FormData()),
+    json: () => Promise.resolve(data),
+    text: () => Promise.resolve(JSON.stringify(data)),
+  } as Response)
+}
+
 describe('useEditEventForm', () => {
   const mockEvent = {
     id: '1',
@@ -41,38 +62,41 @@ describe('useEditEventForm', () => {
     // Limpa o histórico de chamadas e instâncias de todos os mocks
     vi.clearAllMocks()
 
+    // Helper para criar um Response mock
+    function createResponse(data: any, requestUrl: string, ok = true, status = 200) {
+      return Promise.resolve({
+        ok,
+        status,
+        statusText: ok ? 'OK' : 'Error',
+        headers: new Headers(),
+        redirected: false,
+        type: 'basic' as ResponseType,
+        url: requestUrl,
+        clone() { return this },
+        body: null,
+        bodyUsed: false,
+        arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+        blob: () => Promise.resolve(new Blob()),
+        formData: () => Promise.resolve(new FormData()),
+        json: () => Promise.resolve(data),
+        text: () => Promise.resolve(JSON.stringify(data)),
+      } as Response)
+    }
+
     // Usa vi.spyOn para interceptar o fetch de forma segura
-    vi.spyOn(global, 'fetch').mockImplementation((url: any, opts: any) => {
-      // Helper para criar um Response mock
-      function createResponse(data: any, ok = true, status = 200) {
-        return Promise.resolve({
-          ok,
-          status,
-          statusText: ok ? 'OK' : 'Error',
-          headers: new Headers(),
-          redirected: false,
-          type: 'basic',
-          url: typeof url === 'string' ? url : '',
-          clone() { return this },
-          body: null,
-          bodyUsed: false,
-          arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
-          blob: () => Promise.resolve(new Blob()),
-          formData: () => Promise.resolve(new FormData()),
-          json: () => Promise.resolve(data),
-          text: () => Promise.resolve(JSON.stringify(data)),
-        } as Response)
-      }
+    vi.spyOn(global, 'fetch').mockImplementation((requestUrl: string | URL | Request, opts: RequestInit = {}) => {
+      const url = requestUrl instanceof URL || requestUrl instanceof Request ? requestUrl.toString() : requestUrl
       // Lógica do mock para GET /api/events (evita loop)
-      if (typeof url === 'string' && url.includes('/api/events') && (!opts || opts.method === 'GET')) {
-        return createResponse([])
+      if (url.includes('/api/events') && (!opts || opts.method === 'GET')) {
+        return createResponse([], url)
       }
       // Lógica para PUT
       if (opts && opts.method === 'PUT') {
-        return createResponse({ ...mockEvent, ...JSON.parse(opts.body) })
+        const body = opts.body ? JSON.parse(opts.body as string) : {}
+        return createResponse({ ...mockEvent, ...body }, url)
       }
       // Fallback para outras chamadas
-      return createResponse({})
+      return createResponse({}, url)
     })
   })
 
@@ -89,32 +113,14 @@ describe('useEditEventForm', () => {
   it('deve validar sobreposição de eventos', async () => {
     // Mock específico para este teste
     // O spy criado no beforeEach será sobrescrito por este.
-    vi.spyOn(global, 'fetch').mockImplementation((url: any) => {
-      function createResponse(data: any, ok = true, status = 200) {
-        return Promise.resolve({
-          ok,
-          status,
-          statusText: ok ? 'OK' : 'Error',
-          headers: new Headers(),
-          redirected: false,
-          type: 'basic',
-          url: typeof url === 'string' ? url : '',
-          clone() { return this },
-          body: null,
-          bodyUsed: false,
-          arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
-          blob: () => Promise.resolve(new Blob()),
-          formData: () => Promise.resolve(new FormData()),
-          json: () => Promise.resolve(data),
-          text: () => Promise.resolve(JSON.stringify(data)),
-        } as Response)
-      }
-      if (typeof url === 'string' && url.includes('/api/events')) {
+    vi.spyOn(global, 'fetch').mockImplementation((requestUrl: string | URL | Request, opts: RequestInit = {}) => {
+      const url = requestUrl instanceof URL || requestUrl instanceof Request ? requestUrl.toString() : requestUrl
+      if (url.includes('/api/events')) {
         return createResponse([
           { ...mockEvent, id: '2', startTime: '09:30', endTime: '10:30', date: '2025-10-27' },
-        ])
+        ], url)
       }
-      return createResponse({})
+      return createResponse({}, url)
     })
 
     let result: any
@@ -123,30 +129,12 @@ describe('useEditEventForm', () => {
 
   it('deve lidar com erro de API ao submeter', async () => {
     // Mock específico para este teste
-    vi.spyOn(global, 'fetch').mockImplementation((url: any, opts: any) => {
-      function createResponse(data: any, ok = true, status = 200) {
-        return Promise.resolve({
-          ok,
-          status,
-          statusText: ok ? 'OK' : 'Error',
-          headers: new Headers(),
-          redirected: false,
-          type: 'basic',
-          url: typeof url === 'string' ? url : '',
-          clone() { return this },
-          body: null,
-          bodyUsed: false,
-          arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
-          blob: () => Promise.resolve(new Blob()),
-          formData: () => Promise.resolve(new FormData()),
-          json: () => Promise.resolve(data),
-          text: () => Promise.resolve(JSON.stringify(data)),
-        } as Response)
-      }
+    vi.spyOn(global, 'fetch').mockImplementation((requestUrl: string | URL | Request, opts: RequestInit = {}) => {
+      const url = requestUrl instanceof URL || requestUrl instanceof Request ? requestUrl.toString() : requestUrl
       if (opts && opts.method === 'PUT') {
-        return createResponse({ error: 'Erro ao editar evento' }, false, 400)
+        return createResponse({ error: 'Erro ao editar evento' }, url, false, 400)
       }
-      return createResponse([])
+      return createResponse([], url)
     })
 
     let result: any
